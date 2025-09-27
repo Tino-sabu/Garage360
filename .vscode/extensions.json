@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-json",
+    "ckolkman.vscode-postgres",
+    "ms-ossdata.vscode-postgresql",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.vscode-eslint",
+    "ms-python.python",
+    "ms-vscode.powershell",
+    "humao.rest-client"
+  ]
+}

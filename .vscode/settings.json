@@ -1,0 +1,59 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "files.associations": {
+    "*.sql": "sql"
+  },
+  "sql.connections": [
+    {
+      "name": "Garage360 Local",
+      "server": "localhost",
+      "database": "garage360",
+      "port": 5432,
+      "user": "garage360_app",
+      "password": "",
+      "emptyPasswordInput": false,
+      "savePassword": false,
+      "profileName": "garage360_local"
+    }
+  ],
+  "sqltools.useNodeRuntime": true,
+  "sqltools.autoConnectTo": "garage360_local",
+  "[sql]": {
+    "editor.defaultFormatter": "ms-ossdata.vscode-postgresql"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.preferences.quoteStyle": "single",
+  "javascript.preferences.quoteStyle": "single",
+  "tailwindCSS.includeLanguages": {
+    "javascript": "javascript",
+    "html": "HTML"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    "tw`([^`]*)",
+    "tw=\"([^\"]*)",
+    "tw={\"([^\"}]*)",
+    "tw\\.\\w+`([^`]*)",
+    "tw\\(.*?\\)`([^`]*)"
+  ]
+}
