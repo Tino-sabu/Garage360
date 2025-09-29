@@ -81,6 +81,7 @@ const { router: authRouter } = require('./routes/auth');
 app.use('/api/auth', authRouter);
 app.use('/api/users', require('./routes/users'));
 app.use('/api/services', require('./routes/services'));
+app.use('/api/service-requests', require('./routes/service-requests'));
 app.use('/api/parts', require('./routes/parts'));
 app.use('/api/customers', require('./routes/customers'));
 app.use('/api/mechanics', require('./routes/mechanics'));

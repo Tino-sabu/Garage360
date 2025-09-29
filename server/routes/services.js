@@ -6,12 +6,11 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const result = await query(`
-      SELECT service_id, name, description, category, estimated_time, base_price, is_active, created_at
+      SELECT service_id, name, description, category, estimated_time, base_price, created_at
       FROM services 
-      WHERE is_active = true
       ORDER BY category, name
     `);
-    
+
     res.json({
       success: true,
       data: result.rows,
@@ -32,12 +31,12 @@ router.get('/category/:category', async (req, res) => {
   try {
     const { category } = req.params;
     const result = await query(`
-      SELECT service_id, name, description, category, estimated_time, base_price, is_active
+      SELECT service_id, name, description, category, estimated_time, base_price
       FROM services 
-      WHERE category = $1 AND is_active = true
+      WHERE category = $1
       ORDER BY name
     `, [category]);
-    
+
     res.json({
       success: true,
       data: result.rows,
@@ -60,11 +59,10 @@ router.get('/categories/list', async (req, res) => {
     const result = await query(`
       SELECT DISTINCT category, COUNT(*) as service_count
       FROM services 
-      WHERE is_active = true
       GROUP BY category
       ORDER BY category
     `);
-    
+
     res.json({
       success: true,
       data: result.rows
