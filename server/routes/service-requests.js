@@ -370,4 +370,168 @@ router.patch('/:requestId/status', authenticateToken, async (req, res) => {
     }
 });
 
+// Get service requests assigned to a mechanic
+router.get('/mechanic/jobs', authenticateToken, async (req, res) => {
+    try {
+        const mechanic_id = req.user.userId;
+
+        const result = await query(`
+            SELECT 
+                sr.request_id,
+                sr.customer_id,
+                sr.vehicle_id,
+                sr.request_date,
+                sr.scheduled_date,
+                sr.completion_date,
+                sr.status,
+                sr.customer_notes,
+                sr.mechanic_notes,
+                sr.estimated_cost,
+                sr.final_cost,
+                v.registration_number,
+                v.brand,
+                v.model,
+                v.year,
+                v.color,
+                v.fuel_type,
+                c.name as customer_name,
+                c.phone as customer_phone,
+                c.email as customer_email,
+                s.name as service_name,
+                s.description as service_description,
+                s.category as service_category,
+                s.estimated_time as service_time
+            FROM service_requests sr
+            LEFT JOIN vehicles v ON sr.vehicle_id = v.vehicle_id
+            LEFT JOIN customers c ON sr.customer_id = c.customer_id
+            LEFT JOIN service_request_services srs ON sr.request_id = srs.request_id
+            LEFT JOIN services s ON srs.service_id = s.service_id
+            WHERE sr.assigned_mechanic = $1
+            ORDER BY 
+                CASE sr.status 
+                    WHEN 'in-progress' THEN 1
+                    WHEN 'pending' THEN 2
+                    WHEN 'completed' THEN 3
+                    WHEN 'cancelled' THEN 4
+                    ELSE 5
+                END,
+                sr.scheduled_date ASC
+        `, [mechanic_id]);
+
+        res.json({
+            success: true,
+            data: result.rows,
+            count: result.rows.length
+        });
+
+    } catch (error) {
+        console.error('Get mechanic jobs error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to retrieve assigned jobs',
+            error: error.message
+        });
+    }
+});
+
+// Update job status by mechanic (start, complete, queue)
+router.patch('/mechanic/jobs/:requestId/status', authenticateToken, async (req, res) => {
+    try {
+        const { requestId } = req.params;
+        const { action, mechanic_notes, final_cost } = req.body;
+        const mechanic_id = req.user.userId;
+
+        // Verify this job is assigned to the current mechanic
+        const jobCheck = await query(
+            'SELECT request_id, status, assigned_mechanic FROM service_requests WHERE request_id = $1',
+            [requestId]
+        );
+
+        if (jobCheck.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Job not found'
+            });
+        }
+
+        if (jobCheck.rows[0].assigned_mechanic !== mechanic_id) {
+            return res.status(403).json({
+                success: false,
+                message: 'You can only update jobs assigned to you'
+            });
+        }
+
+        let newStatus;
+        let updateFields = ['updated_at = CURRENT_TIMESTAMP'];
+        let values = [];
+        let paramCount = 0;
+
+        // Determine new status based on action
+        switch (action) {
+            case 'start':
+                newStatus = 'in-progress';
+                break;
+            case 'complete':
+                newStatus = 'completed';
+                // Add completion date
+                paramCount++;
+                updateFields.push(`completion_date = $${paramCount}`);
+                values.push(new Date());
+                break;
+            case 'queue':
+                newStatus = 'pending';
+                break;
+            default:
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid action. Must be start, complete, or queue'
+                });
+        }
+
+        // Add status update
+        paramCount++;
+        updateFields.push(`status = $${paramCount}`);
+        values.push(newStatus);
+
+        // Add mechanic notes if provided
+        if (mechanic_notes !== undefined) {
+            paramCount++;
+            updateFields.push(`mechanic_notes = $${paramCount}`);
+            values.push(mechanic_notes);
+        }
+
+        // Add final cost if provided (usually for completion)
+        if (final_cost !== undefined && action === 'complete') {
+            paramCount++;
+            updateFields.push(`final_cost = $${paramCount}`);
+            values.push(final_cost);
+        }
+
+        // Add request_id for WHERE clause
+        paramCount++;
+        values.push(requestId);
+
+        const result = await query(`
+            UPDATE service_requests 
+            SET ${updateFields.join(', ')}
+            WHERE request_id = $${paramCount}
+            RETURNING request_id, status, mechanic_notes, final_cost, completion_date
+        `, values);
+
+        res.json({
+            success: true,
+            message: `Job ${action === 'start' ? 'started' : action === 'complete' ? 'completed' : 'queued'} successfully`,
+            data: result.rows[0]
+        });
+
+    } catch (error) {
+        console.error('Update job status error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update job status',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;

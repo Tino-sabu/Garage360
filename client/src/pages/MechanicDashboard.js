@@ -31,7 +31,7 @@ const MechanicDashboard = () => {
       description: 'See all assigned service jobs',
       icon: FiTool,
       color: 'bg-blue-500',
-      action: () => console.log('View Jobs')
+      action: () => navigate('/mechanic-jobs')
     },
     {
       title: 'Clock In/Out',
