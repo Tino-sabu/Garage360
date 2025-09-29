@@ -40,7 +40,7 @@ app.get('/api/health', async (req, res) => {
   try {
     const dbConnected = await testConnection();
     const tablesExist = await checkTablesExist();
-    
+
     res.json({
       status: 'OK',
       timestamp: new Date().toISOString(),
@@ -81,7 +81,11 @@ const { router: authRouter } = require('./routes/auth');
 app.use('/api/auth', authRouter);
 app.use('/api/users', require('./routes/users'));
 app.use('/api/services', require('./routes/services'));
-// app.use('/api/vehicles', require('./routes/vehicles'));
+app.use('/api/parts', require('./routes/parts'));
+app.use('/api/customers', require('./routes/customers'));
+app.use('/api/mechanics', require('./routes/mechanics'));
+app.use('/api/cartypes', require('./routes/cartypes'));
+app.use('/api/vehicles', require('./routes/vehicles'));
 // app.use('/api/bookings', require('./routes/bookings'));
 
 // 404 handler
@@ -96,7 +100,7 @@ app.use('*', (req, res) => {
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Global error handler:', err);
-  
+
   if (err.code === '23505') {
     // PostgreSQL unique violation
     return res.status(400).json({
@@ -105,7 +109,7 @@ app.use((err, req, res, next) => {
       error: process.env.NODE_ENV === 'development' ? err.message : 'Database constraint violation'
     });
   }
-  
+
   if (err.code === '23503') {
     // PostgreSQL foreign key violation
     return res.status(400).json({
@@ -114,7 +118,7 @@ app.use((err, req, res, next) => {
       error: process.env.NODE_ENV === 'development' ? err.message : 'Foreign key constraint violation'
     });
   }
-  
+
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal server error',
@@ -131,10 +135,10 @@ const startServer = async () => {
       console.log('⚠️  Starting server without database connection');
       console.log('💡 Make sure PostgreSQL is running and database is set up');
     }
-    
+
     // Check if tables exist
     await checkTablesExist();
-    
+
     app.listen(PORT, () => {
       console.log('🚀 Garage360 API Server started!');
       console.log(`📡 Server running on port ${PORT}`);

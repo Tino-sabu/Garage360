@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiPhone, FiTool } from 'react-icons/fi';
 
@@ -8,8 +8,29 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
-  
+
+  // Background images array
+  const backgroundImages = [
+    '/pic8.jpeg',
+    '/pic6.jpg',
+    '/car2.jpg',
+    '/car3.jpg',
+    '/car5.jpg'
+  ];
+
+  // Rotate background images every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) =>
+        (prevIndex + 1) % backgroundImages.length
+      );
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [backgroundImages.length]);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -33,43 +54,43 @@ const Register = () => {
       setError('Name is required');
       return false;
     }
-    
+
     if (!formData.email.trim()) {
       setError('Email is required');
       return false;
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       setError('Please enter a valid email address');
       return false;
     }
-    
+
     if (!formData.phone.trim()) {
       setError('Phone number is required');
       return false;
     }
-    
+
     if (!formData.password) {
       setError('Password is required');
       return false;
     }
-    
+
     if (formData.password.length < 4) {
       setError('Password must be at least 4 characters long');
       return false;
     }
-    
+
     if (formData.password.length > 12) {
       setError('Password must be no more than 12 characters long');
       return false;
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return false;
     }
-    
+
     return true;
   };
 
@@ -78,7 +99,7 @@ const Register = () => {
     setLoading(true);
     setError('');
     setSuccess('');
-    
+
     if (!validateForm()) {
       setLoading(false);
       return;
@@ -102,11 +123,11 @@ const Register = () => {
 
       if (data.success) {
         setSuccess('Account created successfully! Redirecting to login...');
-        
+
         // Store token and user data
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('user', JSON.stringify(data.data.user));
-        
+
         // Redirect to dashboard after 2 seconds
         setTimeout(() => {
           navigate('/dashboard');
@@ -123,16 +144,16 @@ const Register = () => {
   };
 
   return (
-    <div 
-      className="h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-cover bg-center bg-no-repeat overflow-hidden"
+    <div
+      className="h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-cover bg-center bg-no-repeat overflow-hidden transition-all duration-1000 ease-in-out"
       style={{
-        backgroundImage: 'url(/pic6.jpg)',
+        backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
         backgroundAttachment: 'fixed'
       }}
     >
       {/* Overlay for better readability */}
       <div className="absolute inset-0 bg-black bg-opacity-60"></div>
-      
+
       <div className="max-w-md w-full space-y-6 relative z-10">
         {/* Logo and Header */}
         <div className="text-center">

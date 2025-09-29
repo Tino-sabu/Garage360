@@ -13,7 +13,7 @@ const Navbar = () => {
     // Check for stored user data
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
-    
+
     if (token && userData) {
       setIsAuthenticated(true);
       setUser(JSON.parse(userData));
@@ -39,7 +39,7 @@ const Navbar = () => {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: FiHome },
-    { name: 'Vehicles', path: '/vehicles', icon: FiTruck },
+    { name: 'Vehicles', path: '/car-types', icon: FiTruck },
     { name: 'Services', path: '/services', icon: FiTool },
   ];
 
@@ -65,17 +65,16 @@ const Navbar = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md font-medium transition-all duration-200 ${
-                  isActive(item.path)
+                className={`flex items-center space-x-2 px-3 py-2 rounded-md font-medium transition-all duration-200 ${isActive(item.path)
                     ? 'text-white bg-dark-700 shadow-lg'
                     : 'text-dark-300 hover:text-white hover:bg-dark-700/50'
-                }`}
+                  }`}
               >
                 <item.icon className="text-lg" />
                 <span>{item.name}</span>
               </Link>
             ))}
-            
+
             {/* User Actions */}
             <div className="flex items-center space-x-4 ml-8 pl-8 border-l border-dark-700">
               {isAuthenticated && user ? (
@@ -85,12 +84,12 @@ const Navbar = () => {
                     <p className="text-white font-medium">{user.name}</p>
                     <p className="text-dark-300 text-sm">{getRoleDescription(user.role)}</p>
                   </div>
-                  
+
                   {/* User Avatar */}
                   <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
                     <FiUser className="text-white" />
                   </div>
-                  
+
                   {/* Logout Button */}
                   <button
                     onClick={handleLogout}
@@ -138,18 +137,17 @@ const Navbar = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-md font-medium transition-all duration-200 ${
-                    isActive(item.path)
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-md font-medium transition-all duration-200 ${isActive(item.path)
                       ? 'text-white bg-dark-700'
                       : 'text-dark-300 hover:text-white hover:bg-dark-700/50'
-                  }`}
+                    }`}
                   onClick={() => setIsOpen(false)}
                 >
                   <item.icon className="text-lg" />
                   <span>{item.name}</span>
                 </Link>
               ))}
-              
+
               <div className="pt-4 border-t border-dark-700 mt-4">
                 {isAuthenticated && user ? (
                   <>
@@ -158,7 +156,7 @@ const Navbar = () => {
                       <p className="text-white font-medium">{user.name}</p>
                       <p className="text-dark-300 text-sm">{getRoleDescription(user.role)}</p>
                     </div>
-                    
+
                     {/* Mobile Logout */}
                     <button
                       onClick={handleLogout}
