@@ -18,6 +18,7 @@ import MyVehicles from './pages/MyVehicles';
 import BookService from './pages/BookService';
 import AssignRequests from './pages/AssignRequests';
 import MechanicJobs from './pages/MechanicJobs';
+import JobHistory from './pages/JobHistory';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
 import Navbar from './components/Navbar';
 
@@ -38,7 +39,8 @@ const ConditionalNavbar = () => {
     '/my-vehicles',
     '/book-service',
     '/assign-requests',
-    '/mechanic-jobs'
+    '/mechanic-jobs',
+    '/job-history'
   ];
 
   if (noNavbarRoutes.includes(location.pathname)) {
@@ -72,6 +74,7 @@ function App() {
           <Route path="/book-service" element={<BookService />} />
           <Route path="/assign-requests" element={<AssignRequests />} />
           <Route path="/mechanic-jobs" element={<MechanicJobs />} />
+          <Route path="/job-history" element={<JobHistory />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </div>
