@@ -177,22 +177,6 @@ CREATE INDEX idx_service_requests_status ON service_requests(status);
 CREATE INDEX idx_service_requests_assigned_mechanic ON service_requests(assigned_mechanic);
 CREATE INDEX idx_service_requests_scheduled_date ON service_requests(scheduled_date);
 
--- Service Request Details table - Services requested for each booking
-CREATE TABLE service_request_details (
-    detail_id SERIAL PRIMARY KEY,
-    request_id INTEGER NOT NULL REFERENCES service_requests(request_id) ON DELETE CASCADE,
-    service_id INTEGER NOT NULL REFERENCES services(service_id) ON DELETE RESTRICT,
-    quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
-    unit_price DECIMAL(10,2) NOT NULL CHECK (unit_price >= 0),
-    total_price DECIMAL(10,2) GENERATED ALWAYS AS (quantity * unit_price) STORED,
-    notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Create indexes
-CREATE INDEX idx_service_request_details_request_id ON service_request_details(request_id);
-CREATE INDEX idx_service_request_details_service_id ON service_request_details(service_id);
-
 -- =============================================================================
 -- =============================================================================
 -- INVENTORY MANAGEMENT TABLES

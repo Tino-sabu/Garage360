@@ -98,12 +98,11 @@ DATABASE_URL=postgresql://garage360_app:garage360_secure_pass_2025@localhost:543
 2. **vehicles** - Vehicle information and registration
 3. **services** - Service catalog and pricing
 4. **service_requests** - Service booking and tracking
-5. **service_request_details** - Detailed services for each request
-6. **parts** - Inventory management
-7. **service_parts** - Parts used in services
-8. **invoices** - Billing information
-9. **payments** - Payment tracking
-10. **activity_logs** - Audit trail
+5. **parts** - Inventory management
+6. **service_parts** - Parts used in services
+7. **invoices** - Billing information
+8. **payments** - Payment tracking
+9. **activity_logs** - Audit trail
 
 ### Key Features
 

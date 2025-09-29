@@ -75,7 +75,7 @@ const ManagerDashboard = () => {
     },
     {
       title: 'Customer Management',
-      description: 'View and manage customers',
+      description: 'View registered customers',
       icon: FiUser,
       color: 'bg-purple-500',
       action: () => navigate('/customer-management')

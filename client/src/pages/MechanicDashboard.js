@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { FiTool, FiClock, FiCheckCircle, FiAlertCircle, FiUser, FiPhone, FiMail, FiDollarSign } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import { FiTool, FiClock, FiCheckCircle, FiAlertCircle, FiUser, FiPhone, FiMail, FiPackage, FiDollarSign } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
 
 const MechanicDashboard = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [assignedJobs, setAssignedJobs] = useState([]);
   const [todayStats, setTodayStats] = useState({
     totalJobs: 0,
     completedJobs: 0,
-    pendingJobs: 0,
-    earnedToday: 0
+    pendingJobs: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -47,11 +48,11 @@ const MechanicDashboard = () => {
       action: () => console.log('Job History')
     },
     {
-      title: 'Earnings',
-      description: 'View your earnings and hours',
-      icon: FiDollarSign,
+      title: 'Stock Management',
+      description: 'Manage parts and inventory',
+      icon: FiPackage,
       color: 'bg-orange-500',
-      action: () => console.log('Earnings')
+      action: () => navigate('/parts-management')
     }
   ];
 
@@ -115,7 +116,7 @@ const MechanicDashboard = () => {
                 <FiDollarSign className="text-primary-400" />
                 <div>
                   <p className="text-dark-300 text-sm">Hourly Rate</p>
-                  <p className="text-white">${user?.hourly_rate || 'N/A'}</p>
+                  <p className="text-white">₹{user?.hourly_rate || 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -134,10 +135,10 @@ const MechanicDashboard = () => {
           </div>
 
           {/* Today's Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="card text-center">
               <div className="text-3xl font-bold text-blue-400 mb-2">{todayStats.totalJobs}</div>
-              <p className="text-dark-300">Total Jobs</p>
+              <p className="text-dark-300"> Jobs for the day</p>
             </div>
             <div className="card text-center">
               <div className="text-3xl font-bold text-green-400 mb-2">{todayStats.completedJobs}</div>
@@ -146,10 +147,6 @@ const MechanicDashboard = () => {
             <div className="card text-center">
               <div className="text-3xl font-bold text-yellow-400 mb-2">{todayStats.pendingJobs}</div>
               <p className="text-dark-300">Pending</p>
-            </div>
-            <div className="card text-center">
-              <div className="text-3xl font-bold text-primary-400 mb-2">${todayStats.earnedToday}</div>
-              <p className="text-dark-300">Earned Today</p>
             </div>
           </div>
 
