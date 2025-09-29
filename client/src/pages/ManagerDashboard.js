@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiUsers, FiUser, FiPhone, FiMail, FiShield, FiPackage, FiTool, FiTruck } from 'react-icons/fi';
+import { FiUsers, FiUser, FiPhone, FiMail, FiShield, FiPackage, FiTool, FiTruck, FiClipboard } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
 
 const ManagerDashboard = () => {
@@ -66,6 +66,13 @@ const ManagerDashboard = () => {
   }, []);
 
   const quickActions = [
+    {
+      title: 'Assign Requests',
+      description: 'Assign service requests to mechanics',
+      icon: FiClipboard,
+      color: 'bg-orange-500',
+      action: () => navigate('/assign-requests')
+    },
     {
       title: 'Manage Staff',
       description: 'View mechanics available',

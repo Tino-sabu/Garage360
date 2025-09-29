@@ -263,7 +263,7 @@ const MyVehicles = () => {
                                     {/* Action Buttons */}
                                     <div className="flex space-x-2 mt-6">
                                         <button
-                                            onClick={() => navigate(`/book-service/${vehicle.vehicle_id}`)}
+                                            onClick={() => navigate('/book-service', { state: { vehicle } })}
                                             className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
                                         >
                                             Book Service
