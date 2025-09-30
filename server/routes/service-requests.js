@@ -180,6 +180,74 @@ router.get('/customer', authenticateToken, async (req, res) => {
     }
 });
 
+// Get service requests for customer tracking (with detailed info including payment status)
+router.get('/customer/tracking', authenticateToken, async (req, res) => {
+    try {
+        const customer_id = req.user.userId;
+
+        const result = await query(`
+            SELECT 
+                sr.request_id,
+                sr.customer_id,
+                sr.vehicle_id,
+                sr.request_date,
+                sr.scheduled_date,
+                sr.completion_date,
+                sr.status,
+                sr.customer_notes,
+                sr.mechanic_notes,
+                sr.estimated_cost,
+                sr.final_cost,
+                v.registration_number,
+                v.brand,
+                v.model,
+                v.year,
+                v.color,
+                v.fuel_type,
+                c.name as customer_name,
+                c.phone as customer_phone,
+                c.email as customer_email,
+                m.name as mechanic_name,
+                m.phone as mechanic_phone,
+                m.email as mechanic_email,
+                s.name as service_name,
+                s.description as service_description,
+                s.category as service_category,
+                s.estimated_time as service_time
+            FROM service_requests sr
+            LEFT JOIN vehicles v ON sr.vehicle_id = v.vehicle_id
+            LEFT JOIN customers c ON sr.customer_id = c.customer_id
+            LEFT JOIN mechanics m ON sr.assigned_mechanic = m.mechanic_id
+            LEFT JOIN service_request_services srs ON sr.request_id = srs.request_id
+            LEFT JOIN services s ON srs.service_id = s.service_id
+            WHERE sr.customer_id = $1
+            ORDER BY 
+                CASE sr.status 
+                    WHEN 'completed' THEN 1
+                    WHEN 'in_progress' THEN 2
+                    WHEN 'pending' THEN 3
+                    WHEN 'cancelled' THEN 4
+                    ELSE 5
+                END,
+                sr.scheduled_date DESC
+        `, [customer_id]);
+
+        res.json({
+            success: true,
+            data: result.rows,
+            count: result.rows.length
+        });
+
+    } catch (error) {
+        console.error('Get customer tracking info error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to retrieve tracking information',
+            error: error.message
+        });
+    }
+});
+
 // Get all service requests (for managers)
 router.get('/all', authenticateToken, async (req, res) => {
     try {
@@ -529,6 +597,85 @@ router.patch('/mechanic/jobs/:requestId/status', authenticateToken, async (req, 
         res.status(500).json({
             success: false,
             message: 'Failed to update job status',
+            error: error.message
+        });
+    }
+});
+
+// Process payment for a service request
+router.post('/:requestId/payment', authenticateToken, async (req, res) => {
+    try {
+        const { requestId } = req.params;
+        const { amount, payment_method = 'card' } = req.body;
+        const customer_id = req.user.userId;
+
+        // Verify the service request belongs to the customer
+        const requestCheck = await query(
+            'SELECT request_id, customer_id, final_cost, status FROM service_requests WHERE request_id = $1',
+            [requestId]
+        );
+
+        if (requestCheck.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Service request not found'
+            });
+        }
+
+        const serviceRequest = requestCheck.rows[0];
+
+        if (serviceRequest.customer_id !== customer_id) {
+            return res.status(403).json({
+                success: false,
+                message: 'You can only pay for your own service requests'
+            });
+        }
+
+        if (serviceRequest.status !== 'completed') {
+            return res.status(400).json({
+                success: false,
+                message: 'Payment can only be made for completed services'
+            });
+        }
+
+        if (!serviceRequest.final_cost) {
+            return res.status(400).json({
+                success: false,
+                message: 'Final cost not set for this service'
+            });
+        }
+
+        if (amount !== serviceRequest.final_cost) {
+            return res.status(400).json({
+                success: false,
+                message: 'Payment amount does not match the final cost'
+            });
+        }
+
+        // Simulate payment processing
+        // In a real application, you would integrate with a payment gateway here
+        const payment_status = 'paid'; // Simulate successful payment
+        const payment_date = new Date().toISOString();
+
+        // Update the service request with payment information
+        const result = await query(`
+            UPDATE service_requests 
+            SET payment_status = $1, payment_method = $2, payment_date = $3, updated_at = CURRENT_TIMESTAMP
+            WHERE request_id = $4
+            RETURNING request_id, payment_status, payment_method, payment_date, final_cost
+        `, [payment_status, payment_method, payment_date, requestId]);
+
+        res.json({
+            success: true,
+            message: 'Payment processed successfully',
+            data: result.rows[0]
+        });
+
+    } catch (error) {
+        console.error('Process payment error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to process payment',
             error: error.message
         });
     }
