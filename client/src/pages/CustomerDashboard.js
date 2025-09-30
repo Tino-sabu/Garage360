@@ -55,7 +55,7 @@ const CustomerDashboard = () => {
       description: 'View past service records',
       icon: FiClock,
       color: 'bg-orange-500',
-      action: () => console.log('Service History - Coming soon')
+      action: () => navigate('/service-history')
     }
   ];
 

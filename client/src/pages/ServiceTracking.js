@@ -132,7 +132,7 @@ const ServiceTracking = () => {
         <div
             className="min-h-screen bg-cover bg-center bg-no-repeat"
             style={{
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/pic3.jpg')`
+                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/pic2.jpeg')`
             }}
         >
             <Navbar />
@@ -142,10 +142,9 @@ const ServiceTracking = () => {
                 <div className="flex items-center mb-8">
                     <button
                         onClick={() => navigate('/customer-dashboard')}
-                        className="flex items-center text-white hover:text-blue-400 transition-colors mr-6"
+                        className="flex items-center justify-center text-white hover:text-blue-400 transition-colors mr-6 bg-gray-700 hover:bg-gray-600 w-10 h-10 rounded-lg"
                     >
-                        <FiArrowLeft className="mr-2" size={20} />
-                        Back to Dashboard
+                        <FiArrowLeft size={20} />
                     </button>
                     <h1 className="text-3xl font-bold text-white">Track Your Services</h1>
                 </div>

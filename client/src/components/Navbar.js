@@ -55,7 +55,15 @@ const Navbar = () => {
               <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
                 <FiTool className="text-white text-xl" />
               </div>
-              <span className="text-2xl font-bold gradient-text">Garage360</span>
+              <span className="text-2xl font-bold">
+                <span className="text-white">G</span>
+                <span className="text-yellow-400">A</span>
+                <span className="text-white">R</span>
+                <span className="text-blue-400">A</span>
+                <span className="text-white">G</span>
+                <span className="text-yellow-400">E</span>
+                <span className="text-red-500">360</span>
+              </span>
             </Link>
           </div>
 
@@ -66,8 +74,8 @@ const Navbar = () => {
                 key={item.path}
                 to={item.path}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md font-medium transition-all duration-200 ${isActive(item.path)
-                    ? 'text-white bg-dark-700 shadow-lg'
-                    : 'text-dark-300 hover:text-white hover:bg-dark-700/50'
+                  ? 'text-white bg-dark-700 shadow-lg'
+                  : 'text-dark-300 hover:text-white hover:bg-dark-700/50'
                   }`}
               >
                 <item.icon className="text-lg" />
@@ -138,8 +146,8 @@ const Navbar = () => {
                   key={item.path}
                   to={item.path}
                   className={`flex items-center space-x-3 px-3 py-2 rounded-md font-medium transition-all duration-200 ${isActive(item.path)
-                      ? 'text-white bg-dark-700'
-                      : 'text-dark-300 hover:text-white hover:bg-dark-700/50'
+                    ? 'text-white bg-dark-700'
+                    : 'text-dark-300 hover:text-white hover:bg-dark-700/50'
                     }`}
                   onClick={() => setIsOpen(false)}
                 >

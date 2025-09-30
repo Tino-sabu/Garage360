@@ -17,6 +17,7 @@ import AddVehicle from './pages/AddVehicle';
 import MyVehicles from './pages/MyVehicles';
 import BookService from './pages/BookService';
 import ServiceTracking from './pages/ServiceTracking';
+import ServiceHistory from './pages/ServiceHistory';
 import AssignRequests from './pages/AssignRequests';
 import MechanicJobs from './pages/MechanicJobs';
 import JobHistory from './pages/JobHistory';
@@ -40,6 +41,7 @@ const ConditionalNavbar = () => {
     '/my-vehicles',
     '/book-service',
     '/service-tracking',
+    '/service-history',
     '/assign-requests',
     '/mechanic-jobs',
     '/job-history'
@@ -75,6 +77,7 @@ function App() {
           <Route path="/my-vehicles" element={<MyVehicles />} />
           <Route path="/book-service" element={<BookService />} />
           <Route path="/service-tracking" element={<ServiceTracking />} />
+          <Route path="/service-history" element={<ServiceHistory />} />
           <Route path="/assign-requests" element={<AssignRequests />} />
           <Route path="/mechanic-jobs" element={<MechanicJobs />} />
           <Route path="/job-history" element={<JobHistory />} />

@@ -9,10 +9,6 @@ const BookService = () => {
     // Get vehicle data passed from MyVehicles page
     const vehicleData = location.state?.vehicle;
 
-    // Get pre-selected service from Services page
-    const preSelectedService = location.state?.selectedService;
-    const fromServices = location.state?.fromServices;
-
     const [services, setServices] = useState([]);
     const [selectedService, setSelectedService] = useState(null);
     const [customerNotes, setCustomerNotes] = useState('');
@@ -23,34 +19,15 @@ const BookService = () => {
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
-        // Check if user is logged in
+        // Check if user is logged in and vehicle data exists
         const token = localStorage.getItem('token');
-        if (!token) {
+        if (!token || !vehicleData) {
             navigate('/login');
             return;
         }
 
-        // If coming from Services page with pre-selected service, set it
-        if (fromServices && preSelectedService) {
-            // Convert the Services page service format to match the API format
-            const convertedService = {
-                service_id: preSelectedService.id,
-                name: preSelectedService.name,
-                description: preSelectedService.description,
-                base_price: parseInt(preSelectedService.price.replace(/[₹,\s-]/g, '').split('-')[0]) || 0,
-                estimated_time: convertDurationToMinutes(preSelectedService.duration),
-                category: preSelectedService.category
-            };
-            setSelectedService(convertedService);
-            setLoading(false);
-        } else if (vehicleData) {
-            // Original flow from MyVehicles page
-            fetchServices();
-        } else {
-            // No valid entry point
-            navigate('/');
-        }
-    }, [navigate, vehicleData, fromServices, preSelectedService]);
+        fetchServices();
+    }, [navigate, vehicleData]);
 
     const fetchServices = async () => {
         try {
@@ -85,12 +62,6 @@ const BookService = () => {
 
         if (!scheduledDate) {
             setError('Please select a preferred date');
-            return;
-        }
-
-        // If coming from Services page without vehicle data, redirect to add vehicle
-        if (fromServices && !vehicleData) {
-            setError('Please add your vehicle details first');
             return;
         }
 
@@ -146,21 +117,6 @@ const BookService = () => {
         }
     };
 
-    const convertDurationToMinutes = (duration) => {
-        // Convert duration strings like "30-45 mins", "2-4 hours" to minutes
-        const match = duration.match(/(\d+)[-\s]*(\d+)?\s*(mins?|hours?)/i);
-        if (match) {
-            const value = parseInt(match[1]);
-            const unit = match[3].toLowerCase();
-            if (unit.includes('hour')) {
-                return value * 60;
-            } else {
-                return value;
-            }
-        }
-        return 60; // default to 1 hour
-    };
-
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -180,16 +136,15 @@ const BookService = () => {
                 {/* Header */}
                 <div className="flex items-center mb-8">
                     <button
-                        onClick={() => navigate(fromServices ? '/services' : '/my-vehicles')}
-                        className="flex items-center text-white hover:text-blue-400 transition-colors mr-6"
+                        onClick={() => navigate('/my-vehicles')}
+                        className="flex items-center justify-center text-white hover:text-blue-400 transition-colors mr-6 bg-gray-700 hover:bg-gray-600 w-10 h-10 rounded-lg"
                     >
-                        <FiArrowLeft className="mr-2" size={20} />
-                        {fromServices ? 'Back to Services' : 'Back to My Vehicles'}
+                        <FiArrowLeft size={20} />
                     </button>
                     <h1 className="text-3xl font-bold text-white">Book Service</h1>
                 </div>
 
-                {/* Vehicle Info Card - Only show if we have vehicle data */}
+                {/* Vehicle Info Card */}
                 {vehicleData && (
                     <div className="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
                         <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
@@ -213,23 +168,6 @@ const BookService = () => {
                     </div>
                 )}
 
-                {/* Service booking for users without vehicle data */}
-                {fromServices && !vehicleData && (
-                    <div className="bg-yellow-600 text-white p-4 rounded-lg mb-6 flex items-center">
-                        <FiTruck className="mr-2" />
-                        <div>
-                            <p className="font-medium">Add Vehicle Required</p>
-                            <p className="text-sm">Please add your vehicle details first to book this service.</p>
-                            <button
-                                onClick={() => navigate('/add-vehicle')}
-                                className="mt-2 bg-white text-yellow-600 px-4 py-1 rounded text-sm font-medium hover:bg-gray-100"
-                            >
-                                Add Vehicle
-                            </button>
-                        </div>
-                    </div>
-                )}
-
                 {/* Success Message */}
                 {success && (
                     <div className="bg-green-600 text-white p-4 rounded-lg mb-6 flex items-center">
@@ -246,7 +184,7 @@ const BookService = () => {
                 )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Services List - Always show */}
+                    {/* Services List */}
                     <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
                         <h2 className="text-xl font-semibold text-white mb-6">Select a Service</h2>
                         <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -280,10 +218,11 @@ const BookService = () => {
                             ))}
                         </div>
                     </div>
-
                     {/* Booking Form */}
                     <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                        <h2 className="text-xl font-semibold text-white mb-6">Booking Details</h2>                        {selectedService ? (
+                        <h2 className="text-xl font-semibold text-white mb-6">Booking Details</h2>
+
+                        {selectedService ? (
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {/* Selected Service Summary */}
                                 <div className="bg-gray-700 rounded-lg p-4">
@@ -332,7 +271,7 @@ const BookService = () => {
                                 {/* Submit Button */}
                                 <button
                                     type="submit"
-                                    disabled={submitting || (fromServices && !vehicleData)}
+                                    disabled={submitting}
                                     className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                                 >
                                     {submitting ? 'Submitting Request...' : 'Book Service'}
@@ -341,7 +280,7 @@ const BookService = () => {
                         ) : (
                             <div className="text-center text-gray-400 py-8">
                                 <FiUser size={48} className="mx-auto mb-4 opacity-50" />
-                                <p>{fromServices ? 'Service selected. Please complete the booking details above.' : 'Please select a service to continue with booking'}</p>
+                                <p>Please select a service to continue with booking</p>
                             </div>
                         )}
                     </div>

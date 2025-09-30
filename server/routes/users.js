@@ -41,11 +41,17 @@ router.get('/stats', async (req, res) => {
       FROM mechanics
     `);
 
-    // Get total vehicles (from cartypes table as a proxy for available vehicle services)
+    // Get total unique vehicles from service_requests table
     const vehiclesResult = await query(`
-      SELECT COUNT(*) as total 
-      FROM cartypes
+      SELECT COUNT(DISTINCT vehicle_id) as total 
+      FROM service_requests
+      WHERE vehicle_id IS NOT NULL
     `);
+
+    console.log('Dashboard Stats Debug:');
+    console.log('Customers:', customersResult.rows[0].total);
+    console.log('Mechanics:', mechanicsResult.rows[0].total);
+    console.log('Vehicles from service_requests (distinct):', vehiclesResult.rows[0].total);
 
     const stats = {
       totalCustomers: parseInt(customersResult.rows[0].total),
