@@ -6,45 +6,41 @@ import Navbar from '../components/Navbar';
 const MechanicDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [assignedJobs, setAssignedJobs] = useState([]);
   const [completedJobs, setCompletedJobs] = useState([]);
   const [todayStats, setTodayStats] = useState({
     totalJobs: 0,
-    completedJobs: 0,
-    pendingJobs: 0
+    completedJobs: 0
   });
   const [loading, setLoading] = useState(true);
 
   const fetchMechanicJobs = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/service-requests/mechanic/jobs', {
+
+      // Fetch assigned jobs to get completed ones
+      const assignedResponse = await fetch('http://localhost:5000/api/service-requests/mechanic/jobs', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        // Handle the correct API response format
-        const jobs = result.success ? result.data : [];
+      if (assignedResponse.ok) {
+        const assignedResult = await assignedResponse.json();
+        const assignedJobs = assignedResult.success ? assignedResult.data : [];
 
-        // Filter jobs into assigned (assigned/in_progress) and completed
-        const assigned = jobs.filter(job => job.status === 'assigned' || job.status === 'in_progress');
-        const completed = jobs.filter(job => job.status === 'completed');
+        // Filter only completed jobs
+        const completed = assignedJobs.filter(job => job.status === 'completed');
 
-        setAssignedJobs(assigned);
         setCompletedJobs(completed);
 
         // Update stats
         setTodayStats({
-          totalJobs: jobs.length,
-          completedJobs: completed.length,
-          pendingJobs: assigned.length
+          totalJobs: completed.length,
+          completedJobs: completed.length
         });
       } else {
-        console.error('Failed to fetch jobs:', response.status);
+        console.error('Failed to fetch jobs');
       }
     } catch (error) {
       console.error('Error fetching mechanic jobs:', error);
@@ -176,18 +172,14 @@ const MechanicDashboard = () => {
           </div>
 
           {/* Today's Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="card text-center">
               <div className="text-3xl font-bold text-blue-400 mb-2">{todayStats.totalJobs}</div>
-              <p className="text-dark-300"> Jobs for the day</p>
+              <p className="text-dark-300">Total Jobs</p>
             </div>
             <div className="card text-center">
               <div className="text-3xl font-bold text-green-400 mb-2">{todayStats.completedJobs}</div>
               <p className="text-dark-300">Completed</p>
-            </div>
-            <div className="card text-center">
-              <div className="text-3xl font-bold text-yellow-400 mb-2">{todayStats.pendingJobs}</div>
-              <p className="text-dark-300">Pending</p>
             </div>
           </div>
 
@@ -209,51 +201,6 @@ const MechanicDashboard = () => {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Assigned Jobs */}
-          <div className="card mb-8">
-            <h3 className="text-lg font-semibold text-white mb-4">Assigned Jobs (Pending/In Progress)</h3>
-            {assignedJobs.length === 0 ? (
-              <div className="text-center py-8">
-                <FiTool className="text-dark-400 text-4xl mx-auto mb-4" />
-                <p className="text-dark-300">No jobs assigned currently</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {assignedJobs.map((job) => (
-                  <div key={job.request_id} className="border border-dark-600 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h4 className="text-white font-medium">{job.service_name}</h4>
-                        <p className="text-dark-300 text-sm">{job.customer_name} - {job.registration_number} {job.brand} {job.model}</p>
-                        <p className="text-dark-400 text-xs">Scheduled: {new Date(job.scheduled_date).toLocaleDateString()}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`inline-block px-2 py-1 rounded text-xs ${job.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                            job.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
-                              'bg-yellow-500/20 text-yellow-400'
-                          }`}>
-                          {job.status.replace('_', ' ').toUpperCase()}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="text-dark-300 text-sm">Est. Cost: ₹{job.estimated_cost}</span>
-                        <span className="text-dark-300 text-sm ml-4">Est. Time: {job.service_time}h</span>
-                      </div>
-                      <button
-                        onClick={() => navigate('/mechanic-jobs')}
-                        className="btn-primary btn-sm"
-                      >
-                        Manage Job
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Completed Jobs */}

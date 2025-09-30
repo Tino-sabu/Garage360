@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FiTruck, FiPlus, FiEdit3, FiTrash2, FiCalendar, FiDroplet, FiHash, FiArrowLeft, FiActivity, FiClock } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
 
 const MyVehicles = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Get pre-selected service from Services page
+    const selectedService = location.state?.selectedService;
+    const fromServices = location.state?.fromServices;
+
     const [user, setUser] = useState(null);
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -263,7 +269,13 @@ const MyVehicles = () => {
                                     {/* Action Buttons */}
                                     <div className="flex space-x-2 mt-6">
                                         <button
-                                            onClick={() => navigate('/book-service', { state: { vehicle } })}
+                                            onClick={() => navigate('/book-service', {
+                                                state: {
+                                                    vehicle,
+                                                    selectedService: selectedService,
+                                                    fromServices: fromServices
+                                                }
+                                            })}
                                             className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
                                         >
                                             Book Service
