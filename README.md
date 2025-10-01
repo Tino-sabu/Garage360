@@ -2,6 +2,14 @@
 
 A comprehensive, modern vehicle service management web application built with React.js and Node.js, featuring role-based access control and a professional dark theme interface.
 
+## ✨ Recent Updates
+
+- **Code Optimization**: Removed unused dependencies and imports for improved performance
+- **Package Cleanup**: Fixed duplicate Tailwind CSS dependencies in client package.json
+- **UI Improvements**: Enhanced navbar with logout button positioning and text
+- **Asset Management**: Optimized image usage across components
+- **Clean Architecture**: Streamlined codebase for better maintainability
+
 ## 🚗 Features
 
 ### Customer Features
@@ -46,6 +54,7 @@ A comprehensive, modern vehicle service management web application built with Re
 - **Tailwind CSS**: Utility-first CSS framework for responsive design
 - **React Router**: Client-side routing for single-page application
 - **React Icons**: Comprehensive icon library (Feather Icons)
+- **Axios**: HTTP client for API communication
 - **Custom Components**: Reusable UI components with consistent styling
 
 ### Backend
@@ -55,11 +64,16 @@ A comprehensive, modern vehicle service management web application built with Re
 - **JWT**: JSON Web Tokens for secure authentication
 - **bcrypt**: Password hashing for security
 - **CORS**: Cross-origin resource sharing middleware
+- **Helmet**: Security middleware for Express
+- **Express Rate Limit**: Rate limiting middleware
+- **Winston**: Logging library
 
 ### Development Tools
 - **npm**: Package management
+- **Nodemon**: Development server with hot reload
 - **Git**: Version control
-- **VS Code**: Recommended development environment
+- **PostCSS**: CSS processing tool
+- **Autoprefixer**: CSS vendor prefixing
 
 ## 📁 Project Structure
 
@@ -204,6 +218,8 @@ Garage360/
 
 ### Vehicles
 - `GET /api/vehicles` - Get user's vehicles
+- `GET /api/vehicles/brands` - Get all vehicle brands from cartypes table
+- `GET /api/vehicles/brands/:brand/models` - Get models by brand from cartypes table
 - `POST /api/vehicles` - Add new vehicle
 - `PUT /api/vehicles/:id` - Update vehicle information
 - `DELETE /api/vehicles/:id` - Remove vehicle
@@ -213,29 +229,203 @@ Garage360/
 - `POST /api/service-requests` - Book a service
 - `GET /api/service-requests/customer` - Get customer's service requests
 - `GET /api/service-requests/mechanic/jobs` - Get mechanic's assigned jobs
+- `PUT /api/service-requests/:id/status` - Update service request status
 
 ### Parts Management
 - `GET /api/parts` - Get parts inventory
 - `PUT /api/parts/:id` - Update part information (Manager only)
+- `GET /api/parts?category=<category>` - Filter parts by category
+- `GET /api/parts?search=<term>` - Search parts by name or code
+
+### Mechanics
+- `GET /api/mechanics` - Get all mechanics (Manager only)
+- `PUT /api/mechanics/:id` - Update mechanic information
+
+## 📊 Database Schema & API Mapping
+
+### Database Tables and Relationships
+
+```mermaid
+erDiagram
+    CUSTOMERS ||--o{ VEHICLES : owns
+    CUSTOMERS ||--o{ SERVICE_REQUESTS : books
+    VEHICLES ||--o{ SERVICE_REQUESTS : requires
+    MECHANICS ||--o{ SERVICE_REQUESTS : assigned_to
+    SERVICES }o--o{ SERVICE_REQUESTS : through_service_request_services
+    PARTS ||--o{ SERVICE_REQUEST_PARTS : used_in
+    SERVICE_REQUESTS ||--o{ SERVICE_REQUEST_PARTS : uses
+    SERVICE_REQUESTS ||--o{ SERVICE_REQUEST_SERVICES : includes
+    CARTYPES ||--|| VEHICLES : references
+
+    CUSTOMERS {
+        int customer_id PK
+        string name
+        string email UK
+        string phone
+        string password
+        string address
+        boolean email_verified
+        boolean phone_verified
+        timestamp created_at
+        timestamp last_login
+    }
+
+    VEHICLES {
+        int vehicle_id PK
+        int customer_id FK
+        string registration_number UK
+        string brand
+        string model
+        int year
+        string fuel_type
+        string color
+        int mileage
+        timestamp created_at
+    }
+
+    MECHANICS {
+        int mechanic_id PK
+        string name
+        string email UK
+        string phone
+        int experience_years
+        string specialization
+        boolean available
+        decimal rating
+        timestamp created_at
+    }
+
+    SERVICE_REQUESTS {
+        int request_id PK
+        int customer_id FK
+        int vehicle_id FK
+        int assigned_mechanic FK
+        date request_date
+        date scheduled_date
+        date completion_date
+        string status
+        text customer_notes
+        text mechanic_notes
+        decimal estimated_cost
+        decimal final_cost
+        timestamp created_at
+    }
+
+    SERVICES {
+        int service_id PK
+        string name UK
+        text description
+        string category
+        decimal base_price
+        int estimated_duration
+        boolean active
+        timestamp created_at
+    }
+
+    PARTS {
+        int part_id PK
+        string part_name
+        string part_code UK
+        string category
+        decimal price
+        int stock_quantity
+        int min_stock_level
+        string supplier
+        text description
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SERVICE_REQUEST_SERVICES {
+        int request_id FK
+        int service_id FK
+    }
+
+    SERVICE_REQUEST_PARTS {
+        int request_id FK
+        int part_id FK
+        int quantity_used
+        decimal part_cost
+    }
+
+    CARTYPES {
+        int id PK
+        string brand
+        string model
+        string variant
+        int year
+        string fuel_type
+        string transmission
+        decimal price
+    }
+```
+
+### Table-to-API Endpoint Mapping
+
+| **Table** | **API Endpoints** | **Frontend Components** |
+|-----------|-------------------|-------------------------|
+| `customers` | `/api/customers/*` | CustomerManagement, CustomerDashboard, Register, Login |
+| `vehicles` | `/api/vehicles/*` | AddVehicle, MyVehicles, Vehicles, CarTypes |
+| `mechanics` | `/api/mechanics/*` | MechanicManagement, MechanicDashboard, AssignRequests |
+| `service_requests` | `/api/service-requests/*` | BookService, ServiceTracking, JobHistory, MechanicJobs |
+| `services` | `/api/services/*` | Services, BookService |
+| `parts` | `/api/parts/*` | PartsManagement, MechanicDashboard |
+| `cartypes` | `/api/vehicles/brands/*` | CarTypes, AddVehicle |
+| `service_request_services` | Embedded in service-requests API | Service booking and tracking |
+| `service_request_parts` | Embedded in parts and service-requests API | Parts usage tracking |
+
+### Data Flow Architecture
+
+```
+Frontend Components → API Routes → Database Tables
+     ↓                   ↓              ↓
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Pages     │ → │   Routes    │ → │   Tables    │
+├─────────────┤    ├─────────────┤    ├─────────────┤
+│ Login       │ → │ /auth       │ → │ customers   │
+│ Register    │ → │ /auth       │ → │ customers   │
+│ CarTypes    │ → │ /vehicles   │ → │ cartypes    │
+│ AddVehicle  │ → │ /vehicles   │ → │ vehicles    │
+│ BookService │ → │ /service-*  │ → │ service_*   │
+│ MechanicJobs│ → │ /mechanics  │ → │ mechanics   │
+│ Parts Mgmt  │ → │ /parts      │ → │ parts       │
+└─────────────┘    └─────────────┘    └─────────────┘
+```
 
 ## 🎯 Current Features Status
 
 ✅ **Completed Features:**
-- User authentication and registration
-- Role-based dashboards
-- Vehicle management
-- Service booking (date-only selection)
-- Customer dashboard with vehicle overview
-- Mechanic dashboard with completed jobs history
-- Manager dashboard with customer/mechanic management
-- Parts inventory management
-- Responsive design with dark theme
-- Service catalog with filtering
+- User authentication and registration with secure JWT tokens
+- Role-based dashboards (Customer, Mechanic, Manager)
+- Vehicle management with comprehensive car model support
+- Service booking system with date selection
+- Customer dashboard with vehicle overview and service tracking
+- Mechanic dashboard with job management and completion history
+- Manager dashboard with comprehensive business management tools
+- Parts inventory management system
+- Responsive design with professional dark theme
+- Service catalog with filtering capabilities
+- Enhanced navigation with improved logout functionality
+- Optimized codebase with cleaned dependencies
 
 🚧 **In Progress:**
 - Real-time job status updates
 - Advanced reporting and analytics
 - Payment processing integration
+- Mobile app development
+
+## 🔧 Code Quality & Maintenance
+
+### Recent Optimizations
+- **Dependency Management**: Removed duplicate Tailwind CSS dependencies
+- **Import Cleanup**: Eliminated unused React Icons imports
+- **Performance**: Optimized component rendering and asset loading
+- **Code Structure**: Improved file organization and component architecture
+
+### Asset Management
+- **Image Optimization**: All vehicle images are in modern formats (WebP, AVIF)
+- **Efficient Loading**: Optimized image loading with proper alt text and responsive sizing
+- **Clean Structure**: Organized assets in logical folder structure
 
 ## 🤝 Contributing
 
@@ -247,11 +437,20 @@ Garage360/
 
 ## 📝 Development Notes
 
-- **Database**: All database schemas and initial data are already loaded in production
-- **Authentication**: Uses JWT tokens with role-based access control
-- **Styling**: Tailwind CSS with custom dark theme configuration
-- **Images**: Vehicle images are optimized and stored in WebP/AVIF formats
-- **Responsive**: Mobile-first design approach
+- **Database**: All database schemas and initial data are configured for production
+- **Authentication**: Uses JWT tokens with secure role-based access control
+- **Styling**: Tailwind CSS with custom dark theme configuration and optimized build
+- **Images**: Vehicle images are optimized and stored in modern formats (WebP/AVIF)
+- **Responsive**: Mobile-first design approach with comprehensive breakpoint coverage
+- **Performance**: Optimized dependencies and eliminated unused imports for faster load times
+- **Security**: Comprehensive security middleware including Helmet and rate limiting
+- **Code Quality**: Clean, maintainable codebase with consistent styling and structure
+
+### Development Best Practices
+- **Component Reusability**: Modular React components with consistent props and styling
+- **Error Handling**: Comprehensive error handling on both frontend and backend
+- **Logging**: Structured logging with Winston for better debugging and monitoring
+- **Testing**: Test-ready structure with Jest configuration
 
 ## 📄 License
 

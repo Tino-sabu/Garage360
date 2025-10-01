@@ -103,10 +103,9 @@ const JobHistory = () => {
                         <div className="flex items-center space-x-4">
                             <button
                                 onClick={() => navigate('/mechanic-dashboard')}
-                                className="flex items-center space-x-2 text-primary-400 hover:text-primary-300"
+                                className="flex items-center text-white hover:text-blue-400 transition-colors"
                             >
-                                <FiArrowLeft />
-                                <span>Back to Dashboard</span>
+                                <FiArrowLeft size={20} />
                             </button>
                         </div>
                         <h1 className="text-3xl font-bold text-white">Job History</h1>

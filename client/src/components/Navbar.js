@@ -101,10 +101,11 @@ const Navbar = () => {
                   {/* Logout Button */}
                   <button
                     onClick={handleLogout}
-                    className="flex items-center space-x-2 text-dark-300 hover:text-white transition-colors"
+                    className="flex items-center space-x-2 text-dark-300 hover:text-white transition-colors ml-6"
                     title="Logout"
                   >
                     <FiLogOut className="text-lg" />
+                    <span>Logout</span>
                   </button>
                 </>
               ) : (
