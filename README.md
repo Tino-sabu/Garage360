@@ -119,6 +119,26 @@ Garage360/
 │   └── package.json      # Backend dependencies
 └── README.md             # This file
 ```
+Screenshots
+<img width="1918" height="968" alt="image" src="https://github.com/user-attachments/assets/de83ed45-1702-4bfd-8d35-2e70b50c0ab4" />
+<img width="1918" height="968" alt="image" src="https://github.com/user-attachments/assets/9732337d-7205-4d5b-aaeb-b01f007eae95" />
+Manager :
+<img width="1918" height="970" alt="image" src="https://github.com/user-attachments/assets/e941721f-8551-453f-af3c-8c73a17da9a9" />
+<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/4a0bae9d-7abb-4752-a99b-1092bd302d77" />
+<img width="1918" height="961" alt="image" src="https://github.com/user-attachments/assets/f74ec1c4-2d2f-4a0f-af6e-c55822ec6bab" />
+<img width="1918" height="963" alt="image" src="https://github.com/user-attachments/assets/f3e7db92-6122-42cd-b5d1-c4ff07fe38da" />
+<img width="1918" height="966" alt="image" src="https://github.com/user-attachments/assets/d3eafe36-a6a7-4d87-b7ca-5cd0608dff00" />
+Customer :
+<img width="1918" height="971" alt="image" src="https://github.com/user-attachments/assets/7d3481b8-3818-440b-9aab-041416c0b0fd" />
+<img width="1918" height="966" alt="image" src="https://github.com/user-attachments/assets/48fd88bc-980b-4ea0-8fe5-444abd80d1e6" />
+<img width="1918" height="966" alt="image" src="https://github.com/user-attachments/assets/175335a4-c2b8-4fd9-b99d-0a3169dbddb5" />
+<img width="1918" height="966" alt="image" src="https://github.com/user-attachments/assets/910cb059-a04d-468a-bb70-733c2be51deb" />
+<img width="1918" height="970" alt="image" src="https://github.com/user-attachments/assets/e6ce6be7-d0b9-4c56-8b88-19a89c93c848" />
+Mechanic :
+<img width="1918" height="972" alt="image" src="https://github.com/user-attachments/assets/f2d389cc-4ffa-4801-8c15-cd77ce6bf343" />
+<img width="1918" height="963" alt="image" src="https://github.com/user-attachments/assets/686ee640-6b7c-4df1-95d9-462636a19d96" />
+<img width="1918" height="968" alt="image" src="https://github.com/user-attachments/assets/7000c64c-8049-48a8-b9c1-ed9a8e55b1e3" />
+<img width="1918" height="972" alt="image" src="https://github.com/user-attachments/assets/53fe2db8-bf8c-48b6-a453-407bda78b3ea" />
 
 ## 🚀 Getting Started
 
