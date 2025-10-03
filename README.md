@@ -140,6 +140,14 @@ Mechanic :
 <img width="1918" height="968" alt="image" src="https://github.com/user-attachments/assets/7000c64c-8049-48a8-b9c1-ed9a8e55b1e3" />
 <img width="1918" height="972" alt="image" src="https://github.com/user-attachments/assets/53fe2db8-bf8c-48b6-a453-407bda78b3ea" />
 
+Screen Recording 
+
+https://github.com/user-attachments/assets/82e40333-e42d-4ed9-9545-c774a6df8883
+
+https://github.com/user-attachments/assets/7c2aaea8-a230-4fac-b2df-893428e7fb79
+
+https://github.com/user-attachments/assets/0ee6ad56-f76d-4695-bf7c-c9abb3cbf300
+
 ## 🚀 Getting Started
 
 ### Prerequisites
