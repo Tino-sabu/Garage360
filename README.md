@@ -27,7 +27,7 @@ A comprehensive, modern vehicle service management web application built with Re
 
 ### Manager Features
 - **Customer Management**: View and manage customer accounts
-- **Mechanic Management**: Assign jobs and manage mechanic workload
+- **Mechanic Management**: Assign jobs and manage mechanic
 - **Service Requests**: Oversee all service requests and assignments
 - **Parts Management**: Manage inventory and stock levels
 - **Analytics Dashboard**: Monitor business performance and metrics
