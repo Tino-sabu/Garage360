@@ -4,12 +4,12 @@ import { FiArrowRight } from 'react-icons/fi';
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen">
+    <div className="h-screen overflow-hidden">
       {/* Hero Section - Full Screen */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
               backgroundImage: `url(/pic1.jpg)`,
@@ -18,7 +18,7 @@ const LandingPage = () => {
           {/* Light overlay for better text readability */}
           <div className="absolute inset-0 bg-black/30"></div>
         </div>
-        
+
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="mb-12 mt-8">
@@ -31,7 +31,7 @@ const LandingPage = () => {
               <span className="text-primary-400 block">Made Simple</span>
             </h2>
             <p className="text-lg lg:text-xl text-white mb-12 max-w-4xl mx-auto drop-shadow-xl font-light leading-relaxed">
-              Manage your garage operations with our comprehensive vehicle service management platform. 
+              Manage your garage operations with our comprehensive vehicle service management platform.
               No complexity, no hassle - just efficient service management.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -50,9 +50,7 @@ const LandingPage = () => {
               </Link>
             </div>
           </div>
-        </div>
-        
-        {/* Additional decorative elements */}
+        </div>        {/* Additional decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-5">
           <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl"></div>
           <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-primary-400/20 rounded-full blur-3xl"></div>

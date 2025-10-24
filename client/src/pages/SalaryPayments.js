@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fi';
 import { salaryPaymentsAPI } from '../config/api';
 import Navbar from '../components/Navbar';
+import PageHeader from '../components/PageHeader';
 
 const SalaryPayments = () => {
     const navigate = useNavigate();
@@ -136,25 +137,19 @@ const SalaryPayments = () => {
     }
 
     return (
-        <div
-            className="min-h-screen bg-cover bg-center bg-no-repeat"
-            style={{
-                backgroundImage: 'url(/pic2.jpg)',
-                backgroundAttachment: 'fixed'
-            }}
-        >
-            <div className="min-h-screen bg-black bg-opacity-70">
-                <Navbar />
-                <div className="py-8 px-4">
-                    <div className="max-w-7xl mx-auto">
-                        {/* Header */}
-                        <div className="mb-8">
-                            <h1 className="text-3xl font-bold text-white mb-2 flex items-center">
-                                <FiDollarSign className="mr-3 text-green-400" />
-                                Salary Payment History
-                            </h1>
-                            <p className="text-dark-300">Track and manage all mechanic salary payments</p>
-                        </div>
+        <div className="min-h-screen bg-gray-900">
+            <Navbar />
+            <PageHeader title="Salary Payment History" />
+
+            <div
+                className="min-h-[calc(100vh-7rem)] bg-cover bg-center bg-no-repeat"
+                style={{
+                    backgroundImage: 'url(/pic2.jpg)',
+                    backgroundAttachment: 'fixed'
+                }}
+            >
+                <div className="min-h-full bg-black bg-opacity-70">
+                    <div className="container mx-auto px-3 xs:px-4 sm:px-6 py-4 sm:py-8 max-w-7xl">
 
                         {error && (
                             <div className="bg-red-900 bg-opacity-30 border border-red-500 text-red-400 px-4 py-3 rounded-lg mb-6">
@@ -164,13 +159,13 @@ const SalaryPayments = () => {
 
                         {/* Statistics Cards */}
                         {stats && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                                <div className="bg-dark-800 rounded-lg p-6 border border-dark-700">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 xs:gap-4 sm:gap-6 mb-4 sm:mb-8">
+                                <div className="bg-dark-800 rounded-lg p-3 xs:p-4 sm:p-6 border border-dark-700">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-dark-300 text-sm">Total Paid</span>
-                                        <FiDollarSign className="text-green-400" />
+                                        <span className="text-dark-300 text-xs sm:text-sm">Total Paid</span>
+                                        <FiDollarSign className="text-green-400 text-sm sm:text-base" />
                                     </div>
-                                    <div className="text-2xl font-bold text-white">
+                                    <div className="text-lg xs:text-xl sm:text-2xl font-bold text-white">
                                         ₹{stats.totalPaid.toFixed(2)}
                                     </div>
                                     <div className="text-xs text-dark-400 mt-1">
@@ -178,12 +173,12 @@ const SalaryPayments = () => {
                                     </div>
                                 </div>
 
-                                <div className="bg-dark-800 rounded-lg p-6 border border-dark-700">
+                                <div className="bg-dark-800 rounded-lg p-3 xs:p-4 sm:p-6 border border-dark-700">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-dark-300 text-sm">This Month</span>
-                                        <FiCalendar className="text-blue-400" />
+                                        <span className="text-dark-300 text-xs sm:text-sm">This Month</span>
+                                        <FiCalendar className="text-blue-400 text-sm sm:text-base" />
                                     </div>
-                                    <div className="text-2xl font-bold text-white">
+                                    <div className="text-lg xs:text-xl sm:text-2xl font-bold text-white">
                                         ₹{stats.monthlyTotal.toFixed(2)}
                                     </div>
                                     <div className="text-xs text-dark-400 mt-1">
@@ -191,12 +186,12 @@ const SalaryPayments = () => {
                                     </div>
                                 </div>
 
-                                <div className="bg-dark-800 rounded-lg p-6 border border-dark-700">
+                                <div className="bg-dark-800 rounded-lg p-3 xs:p-4 sm:p-6 border border-dark-700">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-dark-300 text-sm">Avg Payment</span>
-                                        <FiTrendingUp className="text-purple-400" />
+                                        <span className="text-dark-300 text-xs sm:text-sm">Avg Payment</span>
+                                        <FiTrendingUp className="text-purple-400 text-sm sm:text-base" />
                                     </div>
-                                    <div className="text-2xl font-bold text-white">
+                                    <div className="text-lg xs:text-xl sm:text-2xl font-bold text-white">
                                         ₹{stats.avgPayment.toFixed(2)}
                                     </div>
                                     <div className="text-xs text-dark-400 mt-1">
@@ -204,12 +199,12 @@ const SalaryPayments = () => {
                                     </div>
                                 </div>
 
-                                <div className="bg-dark-800 rounded-lg p-6 border border-dark-700">
+                                <div className="bg-dark-800 rounded-lg p-3 xs:p-4 sm:p-6 border border-dark-700">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-dark-300 text-sm">Mechanics Paid</span>
-                                        <FiUser className="text-yellow-400" />
+                                        <span className="text-dark-300 text-xs sm:text-sm">Mechanics Paid</span>
+                                        <FiUser className="text-yellow-400 text-sm sm:text-base" />
                                     </div>
-                                    <div className="text-2xl font-bold text-white">
+                                    <div className="text-lg xs:text-xl sm:text-2xl font-bold text-white">
                                         {stats.uniqueMechanics}
                                     </div>
                                     <div className="text-xs text-dark-400 mt-1">
@@ -220,14 +215,14 @@ const SalaryPayments = () => {
                         )}
 
                         {/* Filters and Search */}
-                        <div className="bg-dark-800 rounded-lg p-6 border border-dark-700 mb-6">
-                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div className="flex items-center space-x-4">
-                                    <FiFilter className="text-dark-300" />
+                        <div className="bg-dark-800 rounded-lg p-3 xs:p-4 sm:p-6 border border-dark-700 mb-4 sm:mb-6">
+                            <div className="flex flex-col gap-3 sm:gap-4">
+                                <div className="flex flex-col xs:flex-row items-start xs:items-center gap-3">
+                                    <FiFilter className="text-dark-300 hidden xs:block" />
                                     <select
                                         value={filterPeriod}
                                         onChange={(e) => setFilterPeriod(e.target.value)}
-                                        className="bg-dark-700 border border-dark-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500"
+                                        className="w-full xs:w-auto bg-dark-700 border border-dark-600 text-white px-3 xs:px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
                                     >
                                         <option value="all">All Time</option>
                                         <option value="today">Today</option>
@@ -240,13 +235,13 @@ const SalaryPayments = () => {
                                         placeholder="Search mechanic..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="bg-dark-700 border border-dark-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500"
+                                        className="w-full xs:flex-1 bg-dark-700 border border-dark-600 text-white px-3 xs:px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
                                     />
                                 </div>
 
                                 <button
                                     onClick={exportToCSV}
-                                    className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                                    className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 w-full text-sm"
                                 >
                                     <FiDownload />
                                     <span>Export CSV</span>

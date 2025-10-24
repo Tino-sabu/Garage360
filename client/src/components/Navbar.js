@@ -244,8 +244,8 @@ const Navbar = () => {
                   key={item.path}
                   to={item.path}
                   className={`flex items-center space-x-4 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${isActive(item.path)
-                      ? 'text-white bg-primary-500 shadow-lg scale-105'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800 hover:scale-105'
+                    ? 'text-white bg-primary-500 shadow-lg scale-105'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800 hover:scale-105'
                     }`}
                   onClick={() => setIsOpen(false)}
                 >
