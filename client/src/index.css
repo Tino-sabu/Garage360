@@ -6,6 +6,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* Global styles */
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -14,32 +18,82 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Mobile-first responsive container */
+.container-custom {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-custom {
+    max-width: 640px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container-custom {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-custom {
+    max-width: 1024px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-custom {
+    max-width: 1280px;
+  }
 }
 
 /* Custom component styles */
 @layer components {
   .btn-primary {
-    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50;
+    @apply bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 shadow-lg text-sm sm:text-base;
   }
   
   .btn-secondary {
-    @apply bg-dark-700 hover:bg-dark-600 text-white font-medium py-3 px-6 rounded-lg border border-dark-600 hover:border-dark-500 transition-all duration-200;
+    @apply bg-dark-700 hover:bg-dark-600 active:bg-dark-500 text-white font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg border border-dark-600 hover:border-dark-500 transition-all duration-200 text-sm sm:text-base;
+  }
+
+  .btn-icon {
+    @apply p-2 sm:p-3 rounded-lg bg-dark-700 hover:bg-dark-600 active:bg-dark-500 text-dark-300 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500;
   }
   
   .card {
-    @apply bg-dark-800 rounded-xl border border-dark-700 p-6 shadow-lg;
+    @apply bg-dark-800 rounded-lg sm:rounded-xl border border-dark-700 p-4 sm:p-6 shadow-lg;
+  }
+
+  .card-compact {
+    @apply bg-dark-800 rounded-lg border border-dark-700 p-3 sm:p-4 shadow-md;
   }
   
   .input-field {
-    @apply bg-dark-700 border border-dark-600 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors;
+    @apply bg-dark-700 border border-dark-600 text-white rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors text-sm sm:text-base w-full;
+  }
+
+  .input-label {
+    @apply block text-dark-300 font-medium mb-2 text-sm sm:text-base;
   }
   
   .nav-link {
-    @apply text-dark-300 hover:text-white font-medium transition-colors duration-200 px-3 py-2 rounded-md hover:bg-dark-700;
+    @apply text-dark-300 hover:text-white font-medium transition-colors duration-200 px-2 sm:px-3 py-2 rounded-md hover:bg-dark-700 text-sm sm:text-base;
   }
   
   .nav-link-active {
-    @apply text-white bg-dark-700 font-medium px-3 py-2 rounded-md;
+    @apply text-white bg-dark-700 font-medium px-2 sm:px-3 py-2 rounded-md text-sm sm:text-base;
   }
   
   .gradient-text {
@@ -49,11 +103,43 @@ body {
   .glass-morphism {
     @apply bg-dark-800/50 backdrop-blur-lg border border-dark-700/50;
   }
+
+  /* Grid system for responsive cards */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+
+  .grid-responsive-2 {
+    @apply grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6;
+  }
+
+  /* Text utilities for mobile */
+  .text-responsive-xl {
+    @apply text-2xl sm:text-3xl lg:text-4xl;
+  }
+
+  .text-responsive-lg {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+
+  .text-responsive-base {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  /* Spacing utilities */
+  .section-padding {
+    @apply py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8;
+  }
+
+  .page-container {
+    @apply min-h-screen p-4 sm:p-6 lg:p-8;
+  }
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -66,6 +152,31 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-dark-500;
+}
+
+/* Mobile touch optimization */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  button, a {
+    touch-action: manipulation;
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Safe area for notched devices (iPhone X, etc.) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
 }
 
 /* Loading animation */
@@ -101,4 +212,49 @@ body {
 
 .animate-fade-in {
   animation: fade-in 0.8s ease-out forwards;
+}
+
+/* Slide-in animation for mobile menu */
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Responsive font sizes */
+@layer utilities {
+  .text-xs-mobile {
+    font-size: 0.75rem;
+  }
+  
+  @media (min-width: 640px) {
+    .text-xs-mobile {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+/* Card hover effects - disabled on mobile for better performance */
+@media (min-width: 768px) {
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+}
+
+/* Flex utilities for mobile */
+.flex-mobile-col {
+  @apply flex flex-col;
+}
+
+@media (min-width: 640px) {
+  .flex-mobile-col {
+    @apply flex-row;
+  }
 }
