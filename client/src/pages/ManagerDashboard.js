@@ -244,10 +244,10 @@ const ManagerDashboard = () => {
                     <div
                       key={index}
                       onClick={action.action}
-                      className="card-compact hover:bg-dark-700 active:bg-dark-600 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="card-compact hover:bg-dark-700 active:bg-dark-600 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 text-center"
                     >
-                      <div className={`${action.color} w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center mb-2 sm:mb-4 mx-auto sm:mx-0 shadow-lg`}>
-                        <action.icon className="text-white text-lg sm:text-xl" />
+                      <div className={`${action.color} w-12 h-12 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center mb-2 sm:mb-4 mx-auto shadow-lg`}>
+                        <action.icon className="text-white text-xl sm:text-xl" />
                       </div>
                       <h3 className="text-sm sm:text-lg font-semibold text-white mb-1 sm:mb-2">{action.title}</h3>
                       <p className="text-dark-300 text-xs sm:text-sm hidden sm:block">{action.description}</p>
