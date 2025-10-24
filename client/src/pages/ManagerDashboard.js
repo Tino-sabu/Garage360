@@ -169,21 +169,10 @@ const ManagerDashboard = () => {
                   </button>
                 </div>
 
-                {/* Manager Info Card with Clear Button on Mobile */}
+                {/* Manager Info Card */}
                 <div className="card">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                    <h2 className="text-lg sm:text-xl font-semibold text-white">Manager Profile</h2>
-                    
-                    {/* Clear All Requests Button - Mobile Only */}
-                    <button
-                      onClick={() => setShowClearConfirm(true)}
-                      className="sm:hidden flex items-center space-x-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm shadow-lg w-full sm:w-auto justify-center"
-                    >
-                      <FiTrash2 className="text-base" />
-                      <span>Clear All Requests</span>
-                    </button>
-                  </div>
-                  
+                  <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">Manager Profile</h2>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <div className="flex items-center space-x-3 p-3 sm:p-0 bg-dark-700 sm:bg-transparent rounded-lg">
                       <FiUser className="text-primary-400 text-lg sm:text-xl" />
@@ -265,6 +254,17 @@ const ManagerDashboard = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Clear All Requests Button - Mobile Only (Bottom) */}
+              <div className="sm:hidden mb-8">
+                <button
+                  onClick={() => setShowClearConfirm(true)}
+                  className="flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white px-4 py-3 rounded-lg transition-colors duration-200 text-sm shadow-lg w-full"
+                >
+                  <FiTrash2 className="text-lg" />
+                  <span className="font-medium">Clear All Requests</span>
+                </button>
               </div>
             </div>
           </div>

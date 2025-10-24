@@ -63,7 +63,7 @@ body {
   .btn-primary {
     @apply bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 shadow-lg text-sm sm:text-base;
   }
-  
+
   .btn-secondary {
     @apply bg-dark-700 hover:bg-dark-600 active:bg-dark-500 text-white font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg border border-dark-600 hover:border-dark-500 transition-all duration-200 text-sm sm:text-base;
   }
@@ -71,7 +71,7 @@ body {
   .btn-icon {
     @apply p-2 sm:p-3 rounded-lg bg-dark-700 hover:bg-dark-600 active:bg-dark-500 text-dark-300 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500;
   }
-  
+
   .card {
     @apply bg-dark-800 rounded-lg sm:rounded-xl border border-dark-700 p-4 sm:p-6 shadow-lg;
   }
@@ -79,7 +79,7 @@ body {
   .card-compact {
     @apply bg-dark-800 rounded-lg border border-dark-700 p-3 sm:p-4 shadow-md;
   }
-  
+
   .input-field {
     @apply bg-dark-700 border border-dark-600 text-white rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors text-sm sm:text-base w-full;
   }
@@ -87,19 +87,19 @@ body {
   .input-label {
     @apply block text-dark-300 font-medium mb-2 text-sm sm:text-base;
   }
-  
+
   .nav-link {
     @apply text-dark-300 hover:text-white font-medium transition-colors duration-200 px-2 sm:px-3 py-2 rounded-md hover:bg-dark-700 text-sm sm:text-base;
   }
-  
+
   .nav-link-active {
     @apply text-white bg-dark-700 font-medium px-2 sm:px-3 py-2 rounded-md text-sm sm:text-base;
   }
-  
+
   .gradient-text {
     @apply bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent;
   }
-  
+
   .glass-morphism {
     @apply bg-dark-800/50 backdrop-blur-lg border border-dark-700/50;
   }
@@ -159,14 +159,16 @@ body {
   * {
     -webkit-tap-highlight-color: transparent;
   }
-  
-  button, a {
+
+  button,
+  a {
     touch-action: manipulation;
   }
 }
 
 /* Prevent horizontal scroll on mobile */
-html, body {
+html,
+body {
   overflow-x: hidden;
   width: 100%;
 }
@@ -184,10 +186,12 @@ html, body {
   0% {
     transform: scale(0.33);
   }
+
   40%,
   50% {
     opacity: 1;
   }
+
   100% {
     opacity: 0;
     transform: scale(1.33);
@@ -204,6 +208,7 @@ html, body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -219,6 +224,7 @@ html, body {
   from {
     transform: translateX(-100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -233,7 +239,7 @@ html, body {
   .text-xs-mobile {
     font-size: 0.75rem;
   }
-  
+
   @media (min-width: 640px) {
     .text-xs-mobile {
       font-size: 0.875rem;

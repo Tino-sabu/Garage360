@@ -186,23 +186,20 @@ const Navbar = () => {
 
         {/* Mobile Slide-out Navigation Menu */}
         <div
-          className={`md:hidden fixed inset-0 z-50 transition-all duration-300 ${
-            isOpen ? 'visible' : 'invisible'
-          }`}
+          className={`md:hidden fixed inset-0 z-50 transition-all duration-300 ${isOpen ? 'visible' : 'invisible'
+            }`}
         >
           {/* Backdrop */}
           <div
-            className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
-              isOpen ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'
+              }`}
             onClick={() => setIsOpen(false)}
           />
 
           {/* Slide-out Menu */}
           <div
-            className={`absolute top-0 left-0 h-full w-72 sm:w-80 bg-dark-800 border-r border-dark-700 shadow-2xl transform transition-transform duration-300 ease-out ${
-              isOpen ? 'translate-x-0' : '-translate-x-full'
-            }`}
+            className={`absolute top-0 left-0 h-full w-72 sm:w-80 bg-dark-900 border-r border-dark-700 shadow-2xl transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+              }`}
           >
             {/* Menu Header */}
             <div className="flex items-center justify-between p-4 border-b border-dark-700">
@@ -244,11 +241,10 @@ const Navbar = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-4 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
-                    isActive(item.path)
+                  className={`flex items-center space-x-4 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${isActive(item.path)
                       ? 'text-white bg-primary-500 shadow-lg scale-105'
                       : 'text-dark-300 hover:text-white hover:bg-dark-700 hover:scale-105'
-                  }`}
+                    }`}
                   onClick={() => setIsOpen(false)}
                 >
                   <item.icon className="text-xl" />
