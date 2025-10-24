@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    FiArrowLeft,
     FiUser,
     FiTruck,
     FiCalendar,
@@ -13,6 +12,8 @@ import {
     FiEye
 } from 'react-icons/fi';
 import { serviceRequestsAPI, mechanicsAPI } from '../config/api';
+import Navbar from '../components/Navbar';
+import PageHeader from '../components/PageHeader';
 
 const AssignRequests = () => {
     const navigate = useNavigate();
@@ -137,26 +138,17 @@ const AssignRequests = () => {
     }
 
     return (
-        <div
-            className="min-h-screen bg-cover bg-center bg-no-repeat relative"
-            style={{
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/pic2.jpeg')`
-            }}
-        >
-            <div className="container mx-auto px-4 py-8">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center">
-                        <button
-                            onClick={() => navigate('/manager-dashboard')}
-                            className="flex items-center text-white hover:text-blue-400 transition-colors mr-6"
-                        >
-                            <FiArrowLeft className="mr-2" size={20} />
-                            Back to Dashboard
-                        </button>
-                        <h1 className="text-3xl font-bold text-white">Assign Service Requests</h1>
-                    </div>
-                </div>
+        <div className="min-h-screen bg-gray-900">
+            <Navbar />
+            <PageHeader title="Assign Service Requests" />
+            
+            <div
+                className="min-h-[calc(100vh-7rem)] bg-cover bg-center bg-no-repeat relative"
+                style={{
+                    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/pic2.jpeg')`
+                }}
+            >
+                <div className="container mx-auto px-4 py-6 sm:py-8">
 
                 {/* Success/Error Messages */}
                 {success && (
@@ -332,6 +324,7 @@ const AssignRequests = () => {
                         })
                     )}
                 </div>
+            </div>
             </div>
         </div>
     );

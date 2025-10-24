@@ -98,11 +98,8 @@ const Navbar = () => {
 
           {/* Logo - Centered on mobile, left on desktop */}
           <div className="flex items-center absolute left-1/2 transform -translate-x-1/2 md:relative md:left-0 md:transform-none">
-            <Link to="/" className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary-500 rounded-lg flex items-center justify-center shadow-lg">
-                <FiTool className="text-white text-lg sm:text-xl" />
-              </div>
-              <span className="text-xl sm:text-2xl font-bold hidden xs:block">
+            <Link to="/" className="flex items-center">
+              <span className="text-xl sm:text-2xl font-bold">
                 <span className="text-white">G</span>
                 <span className="text-yellow-400">A</span>
                 <span className="text-white">R</span>
@@ -191,30 +188,35 @@ const Navbar = () => {
         >
           {/* Backdrop */}
           <div
-            className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'
+            className={`absolute inset-0 bg-black/80 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'
               }`}
             onClick={() => setIsOpen(false)}
           />
 
           {/* Slide-out Menu */}
           <div
-            className={`absolute top-0 left-0 h-full w-72 sm:w-80 bg-dark-900 border-r border-dark-700 shadow-2xl transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+            className={`absolute top-0 left-0 h-full w-72 sm:w-80 bg-black border-r border-gray-800 shadow-2xl transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
               }`}
           >
             {/* Menu Header */}
-            <div className="flex items-center justify-between p-4 border-b border-dark-700">
+            <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-black">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center shadow-lg">
                   <FiTool className="text-white text-xl" />
                 </div>
                 <span className="text-xl font-bold">
-                  <span className="text-white">GARAGE</span>
+                  <span className="text-white">G</span>
+                  <span className="text-yellow-400">A</span>
+                  <span className="text-white">R</span>
+                  <span className="text-blue-400">A</span>
+                  <span className="text-white">G</span>
+                  <span className="text-yellow-400">E</span>
                   <span className="text-red-500">360</span>
                 </span>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-lg text-dark-300 hover:text-white hover:bg-dark-700 transition-all"
+                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
               >
                 <FiX className="text-2xl" />
               </button>
@@ -222,28 +224,28 @@ const Navbar = () => {
 
             {/* User Info Section */}
             {isAuthenticated && user && (
-              <div className="p-4 bg-dark-700/50 border-b border-dark-700">
+              <div className="p-4 bg-gray-900 border-b border-gray-800">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-primary-400/30">
                     <FiUser className="text-white text-lg" />
                   </div>
                   <div>
                     <p className="text-white font-semibold">{user.name}</p>
-                    <p className="text-dark-300 text-sm">{getRoleDescription(user.role)}</p>
+                    <p className="text-gray-400 text-sm">{getRoleDescription(user.role)}</p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Navigation Links */}
-            <div className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]">
+            <div className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-200px)] bg-black">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={`flex items-center space-x-4 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${isActive(item.path)
                       ? 'text-white bg-primary-500 shadow-lg scale-105'
-                      : 'text-dark-300 hover:text-white hover:bg-dark-700 hover:scale-105'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800 hover:scale-105'
                     }`}
                   onClick={() => setIsOpen(false)}
                 >
@@ -253,11 +255,11 @@ const Navbar = () => {
               ))}
 
               {/* Auth Actions */}
-              <div className="pt-4 mt-4 border-t border-dark-700 space-y-2">
+              <div className="pt-4 mt-4 border-t border-gray-800 space-y-2 bg-black">
                 {isAuthenticated && user ? (
                   <button
                     onClick={handleLogout}
-                    className="flex items-center space-x-4 px-4 py-3 w-full rounded-lg text-dark-300 hover:text-red-400 hover:bg-dark-700 font-medium transition-all"
+                    className="flex items-center space-x-4 px-4 py-3 w-full rounded-lg text-gray-300 hover:text-red-400 hover:bg-gray-800 font-medium transition-all"
                   >
                     <FiLogOut className="text-xl" />
                     <span className="text-base">Logout</span>
@@ -266,7 +268,7 @@ const Navbar = () => {
                   <>
                     <Link
                       to="/login"
-                      className="flex items-center justify-center px-4 py-3 rounded-lg text-dark-300 hover:text-white hover:bg-dark-700 font-medium transition-all"
+                      className="flex items-center justify-center px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 font-medium transition-all"
                       onClick={() => setIsOpen(false)}
                     >
                       Log In
