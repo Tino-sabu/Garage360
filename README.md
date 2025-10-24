@@ -27,7 +27,7 @@ A comprehensive, modern vehicle service management web application built with Re
 
 ### Manager Features
 - **Customer Management**: View and manage customer accounts
-- **Mechanic Management**: Assign jobs and manage mechanic workload
+- **Mechanic Management**: Assign jobs and manage mechanic
 - **Service Requests**: Oversee all service requests and assignments
 - **Parts Management**: Manage inventory and stock levels
 - **Analytics Dashboard**: Monitor business performance and metrics
@@ -479,12 +479,6 @@ Frontend Components → API Routes → Database Tables
 - Mobile app development
 
 ## 🔧 Code Quality & Maintenance
-
-### Recent Optimizations
-- **Dependency Management**: Removed duplicate Tailwind CSS dependencies
-- **Import Cleanup**: Eliminated unused React Icons imports
-- **Performance**: Optimized component rendering and asset loading
-- **Code Structure**: Improved file organization and component architecture
 
 ### Asset Management
 - **Image Optimization**: All vehicle images are in modern formats (WebP, AVIF)
