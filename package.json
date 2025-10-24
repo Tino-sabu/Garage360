@@ -1,0 +1,8 @@
+{
+  "name": "garage360",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "vercel-build": "cd client && npm install && npm run build"
+  }
+}
