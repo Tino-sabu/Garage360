@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiTool } from 'react-icons/fi';
+import { authAPI } from '../config/api';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -50,32 +51,24 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
+      const result = await authAPI.login({
+        email: formData.email,
+        password: formData.password
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (result.success) {
         // Store token and user data
-        localStorage.setItem('token', data.data.token);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
 
         // Redirect to dashboard
         navigate('/dashboard');
       } else {
-        setError(data.message || 'Login failed');
+        setError(result.message || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError('Network error. Please check if the server is running.');
+      setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

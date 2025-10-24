@@ -14,6 +14,7 @@ import {
     FiPhone
 } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { serviceRequestsAPI } from '../config/api';
 
 const ServiceTracking = () => {
     const navigate = useNavigate();
@@ -28,28 +29,18 @@ const ServiceTracking = () => {
 
     const fetchServiceRequests = async () => {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
                 setError('Please log in to view your services');
                 setLoading(false);
                 return;
             }
 
-            const response = await fetch('http://localhost:5000/api/service-requests/customer', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('API Response:', result); // Debug log
-                setServiceRequests(result.success ? result.data : []);
+            const result = await serviceRequestsAPI.getCustomerRequests(user.id);
+            if (result.success) {
+                setServiceRequests(result.data);
             } else {
-                const errorText = await response.text();
-                console.error('Response error:', response.status, response.statusText, errorText);
-                setError(`Failed to fetch service requests. Status: ${response.status}`);
+                setError('Failed to fetch service requests');
             }
         } catch (error) {
             console.error('Error fetching service requests:', error);

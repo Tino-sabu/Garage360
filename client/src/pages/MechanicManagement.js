@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FiMail, FiPhone, FiTool, FiCalendar, FiArrowLeft, FiSearch, FiUsers, FiBriefcase, FiAward } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { mechanicsAPI } from '../config/api';
 
 const MechanicManagement = () => {
+    const navigate = useNavigate();
     const [mechanics, setMechanics] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -17,28 +20,22 @@ const MechanicManagement = () => {
     const fetchMechanics = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5000/api/mechanics', {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            const result = await mechanicsAPI.getAllMechanics();
 
-            if (response.ok) {
-                const data = await response.json();
-                setMechanics(data.data || []);
+            if (result.success) {
+                setMechanics(result.data || []);
 
                 // Calculate stats
-                const total = data.data?.length || 0;
+                const total = result.data?.length || 0;
                 const avgExperience = total > 0 ?
-                    Math.round(data.data.reduce((sum, m) => sum + (m.experience_years || 0), 0) / total) : 0;
+                    Math.round(result.data.reduce((sum, m) => sum + (m.experience_years || 0), 0) / total) : 0;
 
                 setMechanicStats({ total, avgExperience });
 
                 // Extract unique specializations
-                const uniqueSpecs = [...new Set(data.data?.map(m => m.specializations).filter(Boolean).flat())];
+                const uniqueSpecs = [...new Set(result.data?.map(m => m.specializations).filter(Boolean).flat())];
                 setSpecializations(uniqueSpecs);
             } else {
-                console.error('Failed to fetch mechanics:', response.status);
                 setMechanics([]);
             }
         } catch (error) {
@@ -69,7 +66,7 @@ const MechanicManagement = () => {
     });
 
     const goBack = () => {
-        window.history.back();
+        navigate('/dashboard');
     };
 
     if (loading) {
@@ -181,7 +178,10 @@ const MechanicManagement = () => {
                                 </thead>
                                 <tbody>
                                     {filteredMechanics.map((mechanic) => (
-                                        <tr key={mechanic.mechanic_id || mechanic.id} className="border-b border-dark-600 hover:bg-dark-700/50">
+                                        <tr
+                                            key={mechanic.mechanic_id || mechanic.id}
+                                            onClick={() => navigate(`/mechanic-detail/${mechanic.mechanic_id}`)}
+                                            className="border-b border-dark-600 hover:bg-dark-700/50 cursor-pointer transition-colors">
                                             <td className="p-4">
                                                 <div className="flex items-center space-x-3">
                                                     <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center">

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiUsers, FiUser, FiPhone, FiMail, FiShield, FiPackage, FiTool, FiTruck, FiClipboard } from 'react-icons/fi';
+import { FiUsers, FiUser, FiPhone, FiMail, FiShield, FiPackage, FiTool, FiTruck, FiClipboard, FiTrash2 } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { customersAPI, mechanicsAPI, vehiclesAPI, serviceRequestsAPI } from '../config/api';
 
 const ManagerDashboard = () => {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ const ManagerDashboard = () => {
     totalVehicles: 0
   });
   const [loading, setLoading] = useState(true);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   // Show background for 0.5 seconds before displaying content
   useEffect(() => {
@@ -23,23 +26,27 @@ const ManagerDashboard = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Fetch dashboard stats from API
+  // Fetch dashboard stats from Supabase API
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/users/stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
+      // Fetch all counts in parallel
+      const [customersResult, mechanicsResult, vehiclesResult] = await Promise.all([
+        customersAPI.getAllCustomers(),
+        mechanicsAPI.getAllMechanics(),
+        vehiclesAPI.getAllVehicles()
+      ]);
+
+      setDashboardStats({
+        totalCustomers: customersResult.success ? customersResult.data.length : 0,
+        totalMechanics: mechanicsResult.success ? mechanicsResult.data.length : 0,
+        totalVehicles: vehiclesResult.success ? vehiclesResult.data.length : 0
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Dashboard stats fetched:', data); // Debug log
-        setDashboardStats(data.data);
-      } else {
-        console.error('Failed to fetch stats:', response.status, response.statusText);
-      }
+      console.log('Dashboard stats updated:', {
+        customers: customersResult.success ? customersResult.data.length : 0,
+        mechanics: mechanicsResult.success ? mechanicsResult.data.length : 0,
+        vehicles: vehiclesResult.success ? vehiclesResult.data.length : 0
+      });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
     }
@@ -64,6 +71,26 @@ const ManagerDashboard = () => {
     // Clean up interval on component unmount
     return () => clearInterval(refreshInterval);
   }, []);
+
+  const handleClearAllRequests = async () => {
+    setClearing(true);
+    try {
+      const response = await serviceRequestsAPI.clearAll();
+
+      if (response.success) {
+        alert('✅ All service requests and related data have been cleared successfully!');
+        setShowClearConfirm(false);
+        // Refresh stats
+        fetchDashboardStats();
+      } else {
+        alert('❌ Failed to clear requests: ' + response.message);
+      }
+    } catch (error) {
+      alert('❌ Error: ' + error.message);
+    } finally {
+      setClearing(false);
+    }
+  };
 
   const quickActions = [
     {
@@ -119,14 +146,26 @@ const ManagerDashboard = () => {
         {/* Content */}
         {showContent && (
           <div className="animate-fade-in">
-            <div className="container mx-auto px-4 py-8">{/* Welcome Section */}
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">
-                  Manager Dashboard - {user?.name || 'Manager'}
-                </h1>
-                <p className="text-dark-300">
-                  Monitor operations, manage staff, and oversee business performance
-                </p>
+            <div className="container mx-auto px-4 py-8">
+              {/* Welcome Section */}
+              <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-white mb-2">
+                    Manager Dashboard - {user?.name || 'Manager'}
+                  </h1>
+                  <p className="text-dark-300">
+                    Monitor operations, manage staff, and oversee business performance
+                  </p>
+                </div>
+
+                {/* Clear All Requests Button */}
+                <button
+                  onClick={() => setShowClearConfirm(true)}
+                  className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 whitespace-nowrap"
+                >
+                  <FiTrash2 />
+                  <span>Clear All Requests</span>
+                </button>
               </div>
 
               {/* Manager Info Card */}
@@ -201,6 +240,60 @@ const ManagerDashboard = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Modal */}
+        {showClearConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div className="bg-dark-800 rounded-lg p-6 max-w-md w-full border border-red-500">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="bg-red-600 p-3 rounded-full">
+                  <FiTrash2 className="text-white text-xl" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Clear All Requests?</h3>
+              </div>
+
+              <p className="text-dark-300 mb-6">
+                This will permanently delete all service requests, service-request relationships, and service parts data. This action cannot be undone!
+              </p>
+
+              <div className="bg-red-900 bg-opacity-30 border border-red-600 rounded-lg p-3 mb-6">
+                <p className="text-red-400 text-sm font-semibold">⚠️ Warning:</p>
+                <ul className="text-red-300 text-sm mt-2 space-y-1 ml-4 list-disc">
+                  <li>All service requests will be deleted</li>
+                  <li>All service-request-services links will be removed</li>
+                  <li>All service parts records will be cleared</li>
+                </ul>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowClearConfirm(false)}
+                  disabled={clearing}
+                  className="flex-1 bg-dark-700 hover:bg-dark-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleClearAllRequests}
+                  disabled={clearing}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                >
+                  {clearing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Clearing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiTrash2 />
+                      <span>Clear All</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>

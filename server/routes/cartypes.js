@@ -1,21 +1,12 @@
 const express = require('express');
-const { Pool } = require('pg');
 const router = express.Router();
-
-// Database configuration
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'garage360',
-    password: 'Astra1512',
-    port: 5432,
-});
+const { query: dbQuery } = require('../config/database');
 
 // GET /api/cartypes - Get all car types
 router.get('/', async (req, res) => {
     try {
         const { brand, body_type, search } = req.query;
-        let query = `
+        let sqlQuery = `
             SELECT cartype_id, brand, model, body_type, 
                    created_at, updated_at
             FROM cartypes 
@@ -26,28 +17,28 @@ router.get('/', async (req, res) => {
 
         // Filter by brand
         if (brand) {
-            query += ` AND brand = $${paramCount}`;
+            sqlQuery += ` AND brand = $${paramCount}`;
             queryParams.push(brand);
             paramCount++;
         }
 
         // Filter by body type
         if (body_type) {
-            query += ` AND body_type = $${paramCount}`;
+            sqlQuery += ` AND body_type = $${paramCount}`;
             queryParams.push(body_type);
             paramCount++;
         }
 
         // Search filter
         if (search) {
-            query += ` AND (brand ILIKE $${paramCount} OR model ILIKE $${paramCount})`;
+            sqlQuery += ` AND (brand ILIKE $${paramCount} OR model ILIKE $${paramCount})`;
             queryParams.push(`%${search}%`);
             paramCount++;
         }
 
-        query += ' ORDER BY brand, model';
+        sqlQuery += ' ORDER BY brand, model';
 
-        const result = await pool.query(query, queryParams);
+        const result = await dbQuery(sqlQuery, queryParams);
 
         res.json({
             success: true,
@@ -67,8 +58,8 @@ router.get('/', async (req, res) => {
 // GET /api/cartypes/brands - Get unique brands
 router.get('/brands', async (req, res) => {
     try {
-        const query = 'SELECT DISTINCT brand FROM cartypes ORDER BY brand';
-        const result = await pool.query(query);
+        const sqlQuery = 'SELECT DISTINCT brand FROM cartypes ORDER BY brand';
+        const result = await dbQuery(sqlQuery);
 
         res.json({
             success: true,
@@ -87,8 +78,8 @@ router.get('/brands', async (req, res) => {
 // GET /api/cartypes/body-types - Get unique body types
 router.get('/body-types', async (req, res) => {
     try {
-        const query = 'SELECT DISTINCT body_type FROM cartypes ORDER BY body_type';
-        const result = await pool.query(query);
+        const sqlQuery = 'SELECT DISTINCT body_type FROM cartypes ORDER BY body_type';
+        const result = await dbQuery(sqlQuery);
 
         res.json({
             success: true,
@@ -108,8 +99,8 @@ router.get('/body-types', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const query = 'SELECT * FROM cartypes WHERE cartype_id = $1';
-        const result = await pool.query(query, [id]);
+        const sqlQuery = 'SELECT * FROM cartypes WHERE cartype_id = $1';
+        const result = await dbQuery(sqlQuery, [id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({

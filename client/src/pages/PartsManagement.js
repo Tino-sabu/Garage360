@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiPackage, FiEdit2, FiSave, FiX, FiAlertTriangle, FiArrowLeft, FiSearch, FiFilter, FiShoppingCart, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { partsAPI } from '../config/api';
 
 const PartsManagement = () => {
     const [parts, setParts] = useState([]);
@@ -23,26 +24,22 @@ const PartsManagement = () => {
     const fetchParts = async () => {
         try {
             setLoading(true);
-            const categoryParam = categoryFilter !== 'all' ? `?category=${encodeURIComponent(categoryFilter)}` : '';
-            const response = await fetch(`http://localhost:5000/api/parts${categoryParam}`, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            const filters = {};
+            if (categoryFilter !== 'all') filters.category = categoryFilter;
 
-            if (response.ok) {
-                const data = await response.json();
-                setParts(data.data || []);
+            const result = await partsAPI.getAllParts(filters);
+
+            if (result.success) {
+                setParts(result.data || []);
 
                 // Calculate stats
-                const total = data.data?.length || 0;
-                const lowStock = data.data?.filter(part => part.current_stock <= part.stock_min).length || 0;
+                const total = result.data?.length || 0;
+                const lowStock = result.data?.filter(part => part.current_stock <= part.stock_min).length || 0;
                 const inStock = total - lowStock;
-                const totalValue = data.data?.reduce((sum, part) => sum + (part.current_stock * part.avg_cost), 0) || 0;
+                const totalValue = result.data?.reduce((sum, part) => sum + (part.current_stock * part.avg_cost), 0) || 0;
 
                 setPartsStats({ total, lowStock, inStock, totalValue });
             } else {
-                console.error('Failed to fetch parts:', response.status);
                 setParts([]);
             }
         } catch (error) {
@@ -56,15 +53,9 @@ const PartsManagement = () => {
     // Fetch categories
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/parts/categories', {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setCategories(data.data || []);
+            const result = await partsAPI.getCategories();
+            if (result.success) {
+                setCategories(result.data || []);
             }
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -79,29 +70,19 @@ const PartsManagement = () => {
     // Update stock function
     const updateStock = async (partId, stockValue, action) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/parts/${partId}/stock`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    current_stock: parseInt(stockValue),
-                    action: action
-                })
-            });
+            const result = await partsAPI.updateStock(partId, stockValue, action);
 
-            if (response.ok) {
+            if (result.success) {
                 await fetchParts();
                 setEditingPart(null);
                 setStockValue('');
-                alert('Stock updated successfully!');
+                alert('✅ Stock updated successfully!');
             } else {
-                const errorData = await response.json();
-                alert(`Error updating stock: ${errorData.message}`);
+                alert(`❌ Error updating stock: ${result.message}`);
             }
         } catch (error) {
             console.error('Error updating stock:', error);
-            alert('Error updating stock. Please try again.');
+            alert('❌ Error updating stock. Please try again.');
         }
     };
 

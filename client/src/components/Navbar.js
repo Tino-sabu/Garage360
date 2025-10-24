@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiMenu, FiX, FiHome, FiTruck, FiTool, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiTruck, FiTool, FiUser, FiLogOut, FiClipboard, FiDollarSign } from 'react-icons/fi';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,11 +37,29 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: FiHome },
-    { name: 'Vehicles', path: '/car-types', icon: FiTruck },
-    { name: 'Services', path: '/services', icon: FiTool },
-  ];
+  // Get nav items based on user role
+  const getNavItems = () => {
+    const baseItems = [
+      { name: 'Dashboard', path: '/dashboard', icon: FiHome },
+      { name: 'Vehicles', path: '/car-types', icon: FiTruck },
+    ];
+
+    // Add role-specific items
+    if (user?.role === 'manager') {
+      baseItems.push(
+        { name: 'Requests', path: '/assign-requests', icon: FiClipboard },
+        { name: 'Payments', path: '/salary-payments', icon: FiDollarSign }
+      );
+    } else if (user?.role === 'mechanic') {
+      baseItems.push({ name: 'Jobs', path: '/mechanic-jobs', icon: FiTool });
+    } else {
+      baseItems.push({ name: 'Services', path: '/services', icon: FiTool });
+    }
+
+    return baseItems;
+  };
+
+  const navItems = getNavItems();
 
   const isActive = (path) => location.pathname === path;
 

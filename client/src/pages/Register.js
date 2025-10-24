@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiPhone, FiTool } from 'react-icons/fi';
+import { authAPI } from '../config/api';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -106,38 +107,30 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password
-        })
+      const result = await authAPI.register({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        setSuccess('Account created successfully! Redirecting to login...');
+      if (result.success) {
+        setSuccess('Account created successfully! Redirecting to dashboard...');
 
         // Store token and user data
-        localStorage.setItem('token', data.data.token);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
 
         // Redirect to dashboard after 2 seconds
         setTimeout(() => {
           navigate('/dashboard');
         }, 2000);
       } else {
-        setError(data.message || 'Registration failed');
+        setError(result.message || 'Registration failed');
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setError('Network error. Please check if the server is running.');
+      setError('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

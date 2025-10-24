@@ -12,6 +12,7 @@ import {
     FiFilter,
     FiEye
 } from 'react-icons/fi';
+import { serviceRequestsAPI, mechanicsAPI } from '../config/api';
 
 const AssignRequests = () => {
     const navigate = useNavigate();
@@ -46,18 +47,9 @@ const AssignRequests = () => {
 
     const fetchServiceRequests = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/service-requests/all', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setServiceRequests(data.data);
+            const result = await serviceRequestsAPI.getAllRequests();
+            if (result.success) {
+                setServiceRequests(result.data);
             } else {
                 setError('Failed to load service requests');
             }
@@ -72,18 +64,10 @@ const AssignRequests = () => {
     const fetchMechanics = async () => {
         setLoadingMechanics(true);
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/mechanics', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const result = await mechanicsAPI.getAllMechanics();
 
-            const data = await response.json();
-
-            if (data.success) {
-                setMechanics(data.data);
+            if (result.success) {
+                setMechanics(result.data);
             }
         } catch (error) {
             console.error('Error fetching mechanics:', error);
@@ -98,23 +82,13 @@ const AssignRequests = () => {
         setSuccess('');
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/service-requests/${requestId}/assign`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ mechanic_id: mechanicId })
-            });
+            const result = await serviceRequestsAPI.assignMechanic(requestId, mechanicId);
 
-            const data = await response.json();
-
-            if (data.success) {
+            if (result.success) {
                 setSuccess('Mechanic assigned successfully');
-                fetchServiceRequests(); // Refresh the list
+                fetchServiceRequests();
             } else {
-                setError(data.message || 'Failed to assign mechanic');
+                setError(result.message || 'Failed to assign mechanic');
             }
         } catch (error) {
             console.error('Error assigning mechanic:', error);
@@ -227,127 +201,135 @@ const AssignRequests = () => {
                             <p className="text-gray-400">No service requests found</p>
                         </div>
                     ) : (
-                        filteredRequests.map((request) => (
-                            <div key={request.request_id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                    {/* Request Info */}
-                                    <div className="lg:col-span-2">
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div>
-                                                <h3 className="text-xl font-semibold text-white mb-2">
-                                                    Request #{request.request_id}
-                                                </h3>
-                                                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium text-white ${getStatusColor(request.status)}`}>
-                                                    {request.status}
-                                                </span>
+                        filteredRequests.map((request) => {
+                            // Extract nested data
+                            const customer = request.customers || {};
+                            const vehicle = request.vehicles || {};
+                            const mechanic = request.mechanics || {};
+                            const serviceData = request.service_request_services?.[0]?.services || {};
+
+                            return (
+                                <div key={request.request_id} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                        {/* Request Info */}
+                                        <div className="lg:col-span-2">
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div>
+                                                    <h3 className="text-xl font-semibold text-white mb-2">
+                                                        Request #{request.request_id}
+                                                    </h3>
+                                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium text-white ${getStatusColor(request.status)}`}>
+                                                        {request.status}
+                                                    </span>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-gray-400 text-sm">Requested</p>
+                                                    <p className="text-white">{formatDate(request.request_date || request.created_at)}</p>
+                                                </div>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-gray-400 text-sm">Requested</p>
-                                                <p className="text-white">{formatDate(request.request_date)}</p>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                {/* Customer Info */}
+                                                <div className="bg-gray-700 rounded-lg p-4">
+                                                    <h4 className="text-white font-medium mb-2 flex items-center">
+                                                        <FiUser className="mr-2" />
+                                                        Customer
+                                                    </h4>
+                                                    <p className="text-gray-300">{customer.name || 'N/A'}</p>
+                                                    <p className="text-gray-400 text-sm">{customer.email || 'N/A'}</p>
+                                                    <p className="text-gray-400 text-sm">{customer.phone || 'N/A'}</p>
+                                                </div>
+
+                                                {/* Vehicle Info */}
+                                                <div className="bg-gray-700 rounded-lg p-4">
+                                                    <h4 className="text-white font-medium mb-2 flex items-center">
+                                                        <FiTruck className="mr-2" />
+                                                        Vehicle
+                                                    </h4>
+                                                    <p className="text-gray-300">{vehicle.brand} {vehicle.model} ({vehicle.year || 'N/A'})</p>
+                                                    <p className="text-gray-400 text-sm">{vehicle.registration_number}</p>
+                                                </div>
                                             </div>
+
+                                            {/* Service Info */}
+                                            <div className="bg-gray-700 rounded-lg p-4 mb-4">
+                                                <h4 className="text-white font-medium mb-2">Service Details</h4>
+                                                <p className="text-gray-300 font-medium">{serviceData.name || 'N/A'}</p>
+                                                <p className="text-gray-400 text-sm mb-2">{serviceData.description || 'No description'}</p>
+                                                <div className="flex items-center space-x-4">
+                                                    <span className="flex items-center text-green-400">
+                                                        <FiTag className="mr-1" size={14} />
+                                                        {formatCurrency(request.estimated_cost || serviceData.base_price)}
+                                                    </span>
+                                                    <span className="flex items-center text-blue-400">
+                                                        <FiCalendar className="mr-1" size={14} />
+                                                        {formatDate(request.scheduled_date)}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Customer Notes */}
+                                            {request.customer_notes && (
+                                                <div className="bg-gray-700 rounded-lg p-4">
+                                                    <h4 className="text-white font-medium mb-2 flex items-center">
+                                                        <FiMessageSquare className="mr-2" />
+                                                        Customer Notes
+                                                    </h4>
+                                                    <p className="text-gray-300">{request.customer_notes}</p>
+                                                </div>
+                                            )}
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                            {/* Customer Info */}
-                                            <div className="bg-gray-700 rounded-lg p-4">
-                                                <h4 className="text-white font-medium mb-2 flex items-center">
-                                                    <FiUser className="mr-2" />
-                                                    Customer
-                                                </h4>
-                                                <p className="text-gray-300">{request.customer_name}</p>
-                                                <p className="text-gray-400 text-sm">{request.customer_email}</p>
-                                                <p className="text-gray-400 text-sm">{request.customer_phone}</p>
-                                            </div>
+                                        {/* Assignment Section */}
+                                        <div className="space-y-4">
+                                            {/* Current Assignment */}
+                                            {request.assigned_mechanic ? (
+                                                <div className="bg-green-900/20 border border-green-600 rounded-lg p-4">
+                                                    <h4 className="text-white font-medium mb-2 flex items-center">
+                                                        <FiUserCheck className="mr-2" />
+                                                        Assigned Mechanic
+                                                    </h4>
+                                                    <p className="text-green-400 font-medium">{mechanic.name || 'N/A'}</p>
+                                                    <p className="text-gray-400 text-sm">Currently handling this request</p>
+                                                </div>
+                                            ) : (
+                                                <div className="bg-yellow-900/20 border border-yellow-600 rounded-lg p-4">
+                                                    <h4 className="text-white font-medium mb-4 flex items-center">
+                                                        <FiUserCheck className="mr-2" />
+                                                        Assign Mechanic
+                                                    </h4>
 
-                                            {/* Vehicle Info */}
-                                            <div className="bg-gray-700 rounded-lg p-4">
-                                                <h4 className="text-white font-medium mb-2 flex items-center">
-                                                    <FiTruck className="mr-2" />
-                                                    Vehicle
-                                                </h4>
-                                                <p className="text-gray-300">{request.brand} {request.model} ({request.year})</p>
-                                                <p className="text-gray-400 text-sm">{request.registration_number}</p>
-                                            </div>
+                                                    {loadingMechanics ? (
+                                                        <div className="text-center py-4">
+                                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-2">
+                                                            {mechanics.map((mechanic) => (
+                                                                <button
+                                                                    key={mechanic.mechanic_id}
+                                                                    onClick={() => assignMechanic(request.request_id, mechanic.mechanic_id)}
+                                                                    disabled={assigningRequest === request.request_id}
+                                                                    className="w-full text-left bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 p-3 rounded-lg transition-colors"
+                                                                >
+                                                                    <p className="text-white font-medium">{mechanic.name}</p>
+                                                                    <p className="text-gray-400 text-sm">{mechanic.specialization || 'General'}</p>
+                                                                    <p className="text-gray-400 text-xs">{mechanic.experience_years || 0} years experience</p>
+                                                                </button>
+                                                            ))}
+
+                                                            {mechanics.length === 0 && (
+                                                                <p className="text-gray-400 text-sm">No mechanics available</p>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
-
-                                        {/* Service Info */}
-                                        <div className="bg-gray-700 rounded-lg p-4 mb-4">
-                                            <h4 className="text-white font-medium mb-2">Service Details</h4>
-                                            <p className="text-gray-300 font-medium">{request.service_name}</p>
-                                            <p className="text-gray-400 text-sm mb-2">{request.service_description}</p>
-                                            <div className="flex items-center space-x-4">
-                                                <span className="flex items-center text-green-400">
-                                                    <FiTag className="mr-1" size={14} />
-                                                    {formatCurrency(request.estimated_cost)}
-                                                </span>
-                                                <span className="flex items-center text-blue-400">
-                                                    <FiCalendar className="mr-1" size={14} />
-                                                    {formatDate(request.scheduled_date)}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Customer Notes */}
-                                        {request.customer_notes && (
-                                            <div className="bg-gray-700 rounded-lg p-4">
-                                                <h4 className="text-white font-medium mb-2 flex items-center">
-                                                    <FiMessageSquare className="mr-2" />
-                                                    Customer Notes
-                                                </h4>
-                                                <p className="text-gray-300">{request.customer_notes}</p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Assignment Section */}
-                                    <div className="space-y-4">
-                                        {/* Current Assignment */}
-                                        {request.assigned_mechanic ? (
-                                            <div className="bg-green-900/20 border border-green-600 rounded-lg p-4">
-                                                <h4 className="text-white font-medium mb-2 flex items-center">
-                                                    <FiUserCheck className="mr-2" />
-                                                    Assigned Mechanic
-                                                </h4>
-                                                <p className="text-green-400 font-medium">{request.mechanic_name}</p>
-                                                <p className="text-gray-400 text-sm">Currently handling this request</p>
-                                            </div>
-                                        ) : (
-                                            <div className="bg-yellow-900/20 border border-yellow-600 rounded-lg p-4">
-                                                <h4 className="text-white font-medium mb-4 flex items-center">
-                                                    <FiUserCheck className="mr-2" />
-                                                    Assign Mechanic
-                                                </h4>
-
-                                                {loadingMechanics ? (
-                                                    <div className="text-center py-4">
-                                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-2">
-                                                        {mechanics.map((mechanic) => (
-                                                            <button
-                                                                key={mechanic.mechanic_id}
-                                                                onClick={() => assignMechanic(request.request_id, mechanic.mechanic_id)}
-                                                                disabled={assigningRequest === request.request_id}
-                                                                className="w-full text-left bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 p-3 rounded-lg transition-colors"
-                                                            >
-                                                                <p className="text-white font-medium">{mechanic.name}</p>
-                                                                <p className="text-gray-400 text-sm">{mechanic.specialization}</p>
-                                                                <p className="text-gray-400 text-xs">{mechanic.experience_years} years experience</p>
-                                                            </button>
-                                                        ))}
-
-                                                        {mechanics.length === 0 && (
-                                                            <p className="text-gray-400 text-sm">No mechanics available</p>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            )
+                        })
                     )}
                 </div>
             </div>

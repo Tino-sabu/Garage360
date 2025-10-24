@@ -13,6 +13,7 @@ import {
     FiDownload
 } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { serviceRequestsAPI } from '../config/api';
 
 const ServiceHistory = () => {
     const navigate = useNavigate();
@@ -26,30 +27,19 @@ const ServiceHistory = () => {
 
     const fetchCompletedServices = async () => {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
                 setError('Please log in to view your service history');
                 setLoading(false);
                 return;
             }
 
-            const response = await fetch('http://localhost:5000/api/service-requests/customer', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('Service history data:', result);
-                // Filter only completed services
-                const completed = result.success ? result.data.filter(service => service.status === 'completed') : [];
+            const result = await serviceRequestsAPI.getCustomerRequests(user.id);
+            if (result.success) {
+                const completed = result.data.filter(service => service.status === 'completed');
                 setCompletedServices(completed);
             } else {
-                const errorText = await response.text();
-                console.error('Failed to fetch service history:', response.status, errorText);
-                setError(`Failed to load service history. Status: ${response.status}`);
+                setError('Failed to load service history');
             }
         } catch (error) {
             console.error('Error fetching service history:', error);
@@ -185,153 +175,160 @@ const ServiceHistory = () => {
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            {completedServices.map((service) => (
-                                <div key={service.request_id} className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-6 border border-white border-opacity-20">
+                            {completedServices.map((service) => {
+                                // Extract nested data
+                                const vehicle = service.vehicles || {};
+                                const mechanic = service.mechanics || {};
+                                const serviceInfo = service.service_request_services?.[0]?.services || {};
 
-                                    {/* Header with Completion Badge */}
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div className="flex items-start space-x-4">
-                                            <div className="bg-green-500 bg-opacity-20 p-3 rounded-full backdrop-blur-sm border border-green-400 border-opacity-30">
-                                                <FiCheckCircle className="text-green-400 text-xl" />
+                                return (
+                                    <div key={service.request_id} className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-6 border border-white border-opacity-20">
+
+                                        {/* Header with Completion Badge */}
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="flex items-start space-x-4">
+                                                <div className="bg-green-500 bg-opacity-20 p-3 rounded-full backdrop-blur-sm border border-green-400 border-opacity-30">
+                                                    <FiCheckCircle className="text-green-400 text-xl" />
+                                                </div>
+                                                <div>
+                                                    <h2 className="text-2xl font-bold text-white mb-1">
+                                                        {serviceInfo.name || 'Service Request'}
+                                                    </h2>
+                                                    <p className="text-gray-300 text-sm">
+                                                        Request ID: #{service.request_id} • Completed {getDaysAgo(service.completion_date)}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h2 className="text-2xl font-bold text-white mb-1">
-                                                    {service.service_name || 'Service Request'}
-                                                </h2>
-                                                <p className="text-gray-300 text-sm">
-                                                    Request ID: #{service.request_id} • Completed {getDaysAgo(service.completion_date)}
-                                                </p>
+
+                                            <div className="text-right">
+                                                <div className="bg-green-500 bg-opacity-20 text-green-400 px-4 py-2 rounded-full text-sm font-bold border border-green-400 border-opacity-30 mb-2 backdrop-blur-sm">
+                                                    COMPLETED
+                                                </div>
+                                                {service.final_cost && (
+                                                    <p className="text-white font-bold text-xl">{formatCurrency(service.final_cost)}</p>
+                                                )}
                                             </div>
                                         </div>
 
-                                        <div className="text-right">
-                                            <div className="bg-green-500 bg-opacity-20 text-green-400 px-4 py-2 rounded-full text-sm font-bold border border-green-400 border-opacity-30 mb-2 backdrop-blur-sm">
-                                                COMPLETED
+                                        {/* Service Details Grid */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+                                            {/* Vehicle Information */}
+                                            <div className="bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-10">
+                                                <h3 className="text-white font-bold mb-3 flex items-center">
+                                                    <FiTruck className="mr-2 text-blue-400" />
+                                                    Vehicle Details
+                                                </h3>
+                                                <div className="space-y-2">
+                                                    <p className="text-gray-300">
+                                                        <span className="text-gray-400">Vehicle:</span> {vehicle.brand || 'N/A'} {vehicle.model || ''}
+                                                    </p>
+                                                    <p className="text-gray-300">
+                                                        <span className="text-gray-400">Registration:</span> {vehicle.registration_number || 'N/A'}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            {service.final_cost && (
-                                                <p className="text-white font-bold text-xl">{formatCurrency(service.final_cost)}</p>
-                                            )}
+
+                                            {/* Service Timeline */}
+                                            <div className="bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-10">
+                                                <h3 className="text-white font-bold mb-3 flex items-center">
+                                                    <FiCalendar className="mr-2 text-purple-400" />
+                                                    Service Timeline
+                                                </h3>
+                                                <div className="space-y-2">
+                                                    <p className="text-gray-300 text-sm">
+                                                        <span className="text-gray-400">Scheduled:</span> {formatDate(service.scheduled_date)}
+                                                    </p>
+                                                    <p className="text-gray-300 text-sm">
+                                                        <span className="text-gray-400">Completed:</span> {formatDate(service.completion_date)}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {/* Service Details Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                        {/* Mechanic Information */}
+                                        {mechanic.name && (
+                                            <div className="bg-blue-500 bg-opacity-10 backdrop-blur-sm border border-blue-400 border-opacity-30 rounded-lg p-4 mb-6">
+                                                <h3 className="text-white font-bold mb-3 flex items-center">
+                                                    <FiUser className="mr-2 text-blue-400" />
+                                                    Service Technician
+                                                </h3>
+                                                <p className="text-gray-300 font-medium">{mechanic.name}</p>
+                                            </div>
+                                        )}
 
-                                        {/* Vehicle Information */}
-                                        <div className="bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-10">
+                                        {/* Cost Breakdown */}
+                                        <div className="bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 mb-6 border border-white border-opacity-10">
                                             <h3 className="text-white font-bold mb-3 flex items-center">
-                                                <FiTruck className="mr-2 text-blue-400" />
-                                                Vehicle Details
+                                                <FiDollarSign className="mr-2 text-green-400" />
+                                                Cost Summary
                                             </h3>
-                                            <div className="space-y-2">
-                                                <p className="text-gray-300">
-                                                    <span className="text-gray-400">Vehicle:</span> {service.brand} {service.model} ({service.year})
-                                                </p>
-                                                <p className="text-gray-300">
-                                                    <span className="text-gray-400">Registration:</span> {service.registration_number}
-                                                </p>
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <p className="text-gray-400 text-sm">Estimated Cost</p>
+                                                    <p className="text-gray-300 text-lg font-medium">{formatCurrency(service.estimated_cost)}</p>
+                                                </div>
+                                                {service.final_cost && (
+                                                    <div className="text-right">
+                                                        <p className="text-gray-400 text-sm">Final Amount Paid</p>
+                                                        <p className="text-green-400 font-bold text-2xl">{formatCurrency(service.final_cost)}</p>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
-
-                                        {/* Service Timeline */}
-                                        <div className="bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-10">
-                                            <h3 className="text-white font-bold mb-3 flex items-center">
-                                                <FiCalendar className="mr-2 text-purple-400" />
-                                                Service Timeline
-                                            </h3>
-                                            <div className="space-y-2">
-                                                <p className="text-gray-300 text-sm">
-                                                    <span className="text-gray-400">Scheduled:</span> {formatDate(service.scheduled_date)}
-                                                </p>
-                                                <p className="text-gray-300 text-sm">
-                                                    <span className="text-gray-400">Completed:</span> {formatDate(service.completion_date)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Mechanic Information */}
-                                    {service.mechanic_name && (
-                                        <div className="bg-blue-500 bg-opacity-10 backdrop-blur-sm border border-blue-400 border-opacity-30 rounded-lg p-4 mb-6">
-                                            <h3 className="text-white font-bold mb-3 flex items-center">
-                                                <FiUser className="mr-2 text-blue-400" />
-                                                Service Technician
-                                            </h3>
-                                            <p className="text-gray-300 font-medium">{service.mechanic_name}</p>
-                                        </div>
-                                    )}
-
-                                    {/* Cost Breakdown */}
-                                    <div className="bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 mb-6 border border-white border-opacity-10">
-                                        <h3 className="text-white font-bold mb-3 flex items-center">
-                                            <FiDollarSign className="mr-2 text-green-400" />
-                                            Cost Summary
-                                        </h3>
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <p className="text-gray-400 text-sm">Estimated Cost</p>
-                                                <p className="text-gray-300 text-lg font-medium">{formatCurrency(service.estimated_cost)}</p>
-                                            </div>
-                                            {service.final_cost && (
-                                                <div className="text-right">
-                                                    <p className="text-gray-400 text-sm">Final Amount Paid</p>
-                                                    <p className="text-green-400 font-bold text-2xl">{formatCurrency(service.final_cost)}</p>
+                                            {service.final_cost !== service.estimated_cost && (
+                                                <div className="mt-3 pt-3 border-t border-white border-opacity-20">
+                                                    <p className="text-sm text-gray-300">
+                                                        Difference:
+                                                        <span className={`ml-1 font-bold ${service.final_cost > service.estimated_cost ? 'text-red-400' : 'text-green-400'}`}>
+                                                            {service.final_cost > service.estimated_cost ? '+' : ''}{formatCurrency(service.final_cost - service.estimated_cost)}
+                                                        </span>
+                                                    </p>
                                                 </div>
                                             )}
                                         </div>
-                                        {service.final_cost !== service.estimated_cost && (
-                                            <div className="mt-3 pt-3 border-t border-white border-opacity-20">
-                                                <p className="text-sm text-gray-300">
-                                                    Difference:
-                                                    <span className={`ml-1 font-bold ${service.final_cost > service.estimated_cost ? 'text-red-400' : 'text-green-400'}`}>
-                                                        {service.final_cost > service.estimated_cost ? '+' : ''}{formatCurrency(service.final_cost - service.estimated_cost)}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        )}
+
+                                        {/* Service Notes */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                            {/* Customer Notes */}
+                                            {service.customer_notes && (
+                                                <div className="bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-10">
+                                                    <h3 className="text-white font-bold mb-3 flex items-center">
+                                                        <FiFileText className="mr-2 text-yellow-400" />
+                                                        Your Notes
+                                                    </h3>
+                                                    <p className="text-gray-300 text-sm">{service.customer_notes}</p>
+                                                </div>
+                                            )}
+
+                                            {/* Mechanic Notes */}
+                                            {service.mechanic_notes && (
+                                                <div className="bg-blue-500 bg-opacity-10 backdrop-blur-sm border border-blue-400 border-opacity-30 rounded-lg p-4">
+                                                    <h3 className="text-white font-bold mb-3 flex items-center">
+                                                        <FiTool className="mr-2 text-blue-400" />
+                                                        Technician's Report
+                                                    </h3>
+                                                    <p className="text-gray-300 text-sm">{service.mechanic_notes}</p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="flex justify-end mt-6 pt-4 border-t border-white border-opacity-20">
+                                            <button
+                                                onClick={() => {
+                                                    // This could open a detailed view or download receipt
+                                                    alert(`Service details for Request #${service.request_id}\n\nIn a full implementation, this would:\n• Show detailed receipt\n• Download PDF report\n• Allow you to book similar service again`);
+                                                }}
+                                                className="text-blue-400 hover:text-blue-300 transition-colors flex items-center text-sm bg-white bg-opacity-10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white border-opacity-20 hover:bg-opacity-20"
+                                            >
+                                                <FiDownload className="mr-1" size={14} />
+                                                View Details
+                                            </button>
+                                        </div>
                                     </div>
-
-                                    {/* Service Notes */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                                        {/* Customer Notes */}
-                                        {service.customer_notes && (
-                                            <div className="bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-10">
-                                                <h3 className="text-white font-bold mb-3 flex items-center">
-                                                    <FiFileText className="mr-2 text-yellow-400" />
-                                                    Your Notes
-                                                </h3>
-                                                <p className="text-gray-300 text-sm">{service.customer_notes}</p>
-                                            </div>
-                                        )}
-
-                                        {/* Mechanic Notes */}
-                                        {service.mechanic_notes && (
-                                            <div className="bg-blue-500 bg-opacity-10 backdrop-blur-sm border border-blue-400 border-opacity-30 rounded-lg p-4">
-                                                <h3 className="text-white font-bold mb-3 flex items-center">
-                                                    <FiTool className="mr-2 text-blue-400" />
-                                                    Technician's Report
-                                                </h3>
-                                                <p className="text-gray-300 text-sm">{service.mechanic_notes}</p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Action Buttons */}
-                                    <div className="flex justify-end mt-6 pt-4 border-t border-white border-opacity-20">
-                                        <button
-                                            onClick={() => {
-                                                // This could open a detailed view or download receipt
-                                                alert(`Service details for Request #${service.request_id}\n\nIn a full implementation, this would:\n• Show detailed receipt\n• Download PDF report\n• Allow you to book similar service again`);
-                                            }}
-                                            className="text-blue-400 hover:text-blue-300 transition-colors flex items-center text-sm bg-white bg-opacity-10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white border-opacity-20 hover:bg-opacity-20"
-                                        >
-                                            <FiDownload className="mr-1" size={14} />
-                                            View Details
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

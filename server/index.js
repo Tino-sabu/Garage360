@@ -24,7 +24,7 @@ app.use(limiter);
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: process.env.CORS_ORIGIN || '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -140,12 +140,18 @@ const startServer = async () => {
     // Check if tables exist
     await checkTablesExist();
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log('🚀 Garage360 API Server started!');
       console.log(`📡 Server running on port ${PORT}`);
-      console.log(`🌐 API URL: http://localhost:${PORT}/api`);
+      console.log(`🌐 Local: http://localhost:${PORT}/api`);
       console.log(`❤️  Health check: http://localhost:${PORT}/api/health`);
       console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+    }).on('error', (err) => {
+      console.error('❌ Server failed to start:', err);
+      if (err.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} is already in use!`);
+      }
+      process.exit(1);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

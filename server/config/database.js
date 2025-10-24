@@ -1,18 +1,30 @@
 const { Pool } = require('pg');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-// PostgreSQL connection configuration for garage360 database
+// Supabase configuration
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY; // Use service role key for backend
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+// Initialize Supabase client (for authentication and realtime features)
+const supabase = supabaseUrl && (supabaseServiceKey || supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: false
+    }
+  })
+  : null;
+
+// PostgreSQL connection configuration for Supabase
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'garage360',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'Astra1512', // You'll need to set this in .env file
+  connectionString: process.env.SUPABASE_DB_URL,
+  ssl: { rejectUnauthorized: false }, // Supabase requires SSL
   max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 5000, // Return an error after 5 seconds if connection could not be established
-  maxUses: 7500, // Close (and replace) a connection after it has been used 7500 times
-  ssl: false, // Set to true if you need SSL connection
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+  maxUses: 7500,
 };
 
 // Create connection pool
@@ -79,15 +91,15 @@ const checkTablesExist = async () => {
       WHERE table_schema = 'public' 
       AND table_name IN ('customers', 'managers', 'mechanics', 'vehicles', 'services', 'service_requests')
     `);
-    
+
     const tableNames = result.rows.map(row => row.table_name);
     console.log('📋 Existing tables:', tableNames);
-    
+
     if (tableNames.length < 6) {
       console.log('⚠️  Some tables are missing. Run database setup first.');
       console.log('💡 Run: node update-schema.js to create missing tables');
     }
-    
+
     return tableNames.length >= 6;
   } catch (error) {
     console.error('Error checking tables:', error.message);
@@ -100,5 +112,6 @@ module.exports = {
   query,
   transaction,
   testConnection,
-  checkTablesExist
+  checkTablesExist,
+  supabase // Export Supabase client for auth and realtime features
 };

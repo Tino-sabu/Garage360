@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FiClock, FiTag, FiUser, FiTruck, FiMessageSquare, FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { servicesAPI, serviceRequestsAPI } from '../config/api';
 
 const BookService = () => {
     const navigate = useNavigate();
@@ -31,11 +32,9 @@ const BookService = () => {
 
     const fetchServices = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/services');
-            const data = await response.json();
-
-            if (data.success) {
-                setServices(data.data);
+            const result = await servicesAPI.getAllServices();
+            if (result.success) {
+                setServices(result.data);
             } else {
                 setError('Failed to load services');
             }
@@ -69,31 +68,23 @@ const BookService = () => {
         setError('');
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/service-requests', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    vehicle_id: vehicleData.vehicle_id,
-                    service_id: selectedService.service_id,
-                    scheduled_date: scheduledDate,
-                    customer_notes: customerNotes,
-                    estimated_cost: selectedService.base_price
-                })
+            const user = JSON.parse(localStorage.getItem('user'));
+            const result = await serviceRequestsAPI.createServiceRequest({
+                customer_id: user.id,
+                vehicle_id: vehicleData.vehicle_id,
+                service_id: selectedService.service_id,
+                scheduled_date: scheduledDate,
+                customer_notes: customerNotes,
+                estimated_cost: selectedService.base_price
             });
 
-            const data = await response.json();
-
-            if (data.success) {
+            if (result.success) {
                 setSuccess(true);
                 setTimeout(() => {
                     navigate('/my-vehicles');
                 }, 2000);
             } else {
-                setError(data.message || 'Failed to book service');
+                setError(result.message || 'Failed to book service');
             }
         } catch (error) {
             console.error('Error booking service:', error);

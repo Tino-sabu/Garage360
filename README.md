@@ -61,6 +61,7 @@ A comprehensive, modern vehicle service management web application built with Re
 - **Node.js**: JavaScript runtime environment
 - **Express.js**: Web application framework
 - **PostgreSQL**: Relational database for data persistence
+- **Supabase**: Backend-as-a-Service (optional) for cloud PostgreSQL, authentication, and real-time features
 - **JWT**: JSON Web Tokens for secure authentication
 - **bcrypt**: Password hashing for security
 - **CORS**: Cross-origin resource sharing middleware
@@ -177,22 +178,57 @@ https://github.com/user-attachments/assets/0ee6ad56-f76d-4695-bf7c-c9abb3cbf300
 
 4. **Database Setup**
    
-   Create a PostgreSQL database named `garage360` and configure the connection in `server/config/database.js`.
+   You have two options for database setup:
+   
+   **Option A: Supabase (Recommended - Cloud Database)**
+   1. See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions
+   2. Quick steps:
+      - Create account at [supabase.com](https://supabase.com)
+      - Create new project named "garage360"
+      - Copy your credentials and update `.env` file
+      - Run SQL schema in Supabase SQL Editor
+   3. Follow the [Migration Checklist](./MIGRATION_CHECKLIST.md)
+   
+   **Option B: Local PostgreSQL**
+   1. Create a PostgreSQL database named `garage360`
+   2. Configure connection in `server/config/database.js`
+   3. Run the schema files to create tables
    
    The database schema and initial data should already be set up. If not, contact the development team for the schema files.
 
 5. **Environment Configuration**
    
-   Create a `.env` file in the server directory with the following variables:
+   Create a `.env` file in the server directory:
+   
+   **For Supabase (Cloud Database):**
    ```env
+   # Supabase Configuration
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_ANON_KEY=your_anon_key
+   SUPABASE_SERVICE_KEY=your_service_role_key
+   SUPABASE_DB_URL=postgresql://postgres.xxx:password@aws-0-xxx.pooler.supabase.com:5432/postgres
+   
+   # Server Configuration
    PORT=5000
+   NODE_ENV=development
+   JWT_SECRET=your_jwt_secret_key
+   CORS_ORIGIN=http://localhost:3000
+   ```
+   
+   **For Local PostgreSQL:**
+   ```env
    DB_HOST=localhost
    DB_PORT=5432
    DB_NAME=garage360
    DB_USER=your_db_user
    DB_PASSWORD=your_db_password
+   
+   PORT=5000
    JWT_SECRET=your_jwt_secret_key
+   CORS_ORIGIN=http://localhost:3000
    ```
+   
+   See `.env.example` in the server folder for all configuration options.
 
 6. **Start the Application**
    
@@ -486,10 +522,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🚀 Deployment
 
-The application is designed to be deployed with:
+### Supabase Deployment (Recommended)
+The application is ready for deployment with Supabase:
+- **Database**: Supabase PostgreSQL (free tier includes 500MB)
+- **Authentication**: Supabase Auth (built-in)
+- **Storage**: Supabase Storage (for vehicle images)
+- **Real-time**: Built-in real-time subscriptions
+- **Hosting Options**:
+  - Frontend: Vercel, Netlify
+  - Backend: Vercel, Render, Railway
+  
+### Traditional Deployment
 - Frontend: Vercel, Netlify, or similar static hosting
 - Backend: Heroku, Digital Ocean, or similar Node.js hosting
-- Database: PostgreSQL hosting service
+- Database: PostgreSQL hosting service (AWS RDS, Digital Ocean)
+
+### Quick Deploy with Supabase
+1. Set up Supabase project (see [SUPABASE_SETUP.md](./SUPABASE_SETUP.md))
+2. Deploy backend to Vercel/Render with Supabase connection
+3. Deploy frontend to Vercel/Netlify
+4. Update environment variables in hosting platforms
+5. Done! Your app is live with authentication, database, and real-time features
 
 ## 📞 Support
 

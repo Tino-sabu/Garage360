@@ -10,6 +10,7 @@ import {
     FiMessageSquare,
     FiSearch
 } from 'react-icons/fi';
+import { serviceRequestsAPI } from '../config/api';
 
 const JobHistory = () => {
     const navigate = useNavigate();
@@ -34,28 +35,26 @@ const JobHistory = () => {
             return;
         }
 
-        fetchCompletedJobs();
+        // Use mechanic_id if available, otherwise use id
+        const mechanicId = userData.mechanic_id || userData.id;
+        if (mechanicId) {
+            fetchCompletedJobs(mechanicId);
+        } else {
+            setError('No mechanic ID found. Please log out and log back in.');
+            setLoading(false);
+        }
     }, [navigate]);
 
-    const fetchCompletedJobs = async () => {
+    const fetchCompletedJobs = async (mechanicId) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/service-requests/mechanic/jobs', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const result = await serviceRequestsAPI.getMechanicJobs(mechanicId);
 
-            if (response.ok) {
-                const result = await response.json();
-                // Handle the correct API response format
-                const jobs = result.success ? result.data : [];
+            if (result.success) {
+                const jobs = result.data || [];
                 const completed = jobs.filter(job => job.status === 'completed');
                 setCompletedJobs(completed);
             } else {
-                const errorData = await response.json();
-                setError(errorData.message || 'Failed to fetch job history');
+                setError(result.message || 'Failed to fetch job history');
             }
         } catch (error) {
             console.error('Error fetching completed jobs:', error);
@@ -65,13 +64,21 @@ const JobHistory = () => {
         }
     };
 
-    const filteredJobs = completedJobs.filter(job =>
-        (job.service_name && job.service_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (job.customer_name && job.customer_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (job.brand && job.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (job.model && job.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (job.registration_number && job.registration_number.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const filteredJobs = completedJobs.filter(job => {
+        const customer = job.customers || {};
+        const vehicle = job.vehicles || {};
+        const service = job.service_request_services?.[0]?.services || {};
+
+        const searchLower = searchTerm.toLowerCase();
+
+        return (
+            (service.name && service.name.toLowerCase().includes(searchLower)) ||
+            (customer.name && customer.name.toLowerCase().includes(searchLower)) ||
+            (vehicle.brand && vehicle.brand.toLowerCase().includes(searchLower)) ||
+            (vehicle.model && vehicle.model.toLowerCase().includes(searchLower)) ||
+            (vehicle.registration_number && vehicle.registration_number.toLowerCase().includes(searchLower))
+        );
+    });
 
     if (loading) {
         return (
@@ -144,10 +151,11 @@ const JobHistory = () => {
                             <div className="text-2xl font-bold text-blue-400 mb-1">
                                 ₹{completedJobs.reduce((sum, job) => {
                                     const cost = parseFloat(job.final_cost) || parseFloat(job.estimated_cost) || 0;
-                                    return sum + cost;
+                                    const bonus = cost * 0.03; // 3% bonus
+                                    return sum + bonus;
                                 }, 0).toFixed(2)}
                             </div>
-                            <p className="text-dark-300">Total Earnings</p>
+                            <p className="text-dark-300">Bonus Earned</p>
                         </div>
                         <div className="card text-center">
                             <FiCalendar className="text-purple-400 text-3xl mx-auto mb-2" />
@@ -177,72 +185,80 @@ const JobHistory = () => {
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                {filteredJobs.map((job) => (
-                                    <div key={job.request_id} className="border border-dark-600 rounded-lg p-6 hover:border-dark-500 transition-colors">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="flex-1">
-                                                <div className="flex items-center space-x-3 mb-2">
-                                                    <h3 className="text-lg font-semibold text-white">{job.service_name}</h3>
-                                                    <span className="inline-block px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-400">
-                                                        COMPLETED
-                                                    </span>
-                                                </div>
+                                {filteredJobs.map((job) => {
+                                    const customer = job.customers || {};
+                                    const vehicle = job.vehicles || {};
+                                    const service = job.service_request_services?.[0]?.services || {};
 
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                    <div className="flex items-center space-x-2">
-                                                        <FiUser className="text-primary-400" />
-                                                        <span className="text-dark-300">Customer:</span>
-                                                        <span className="text-white">{job.customer_name}</span>
-                                                    </div>
-
-                                                    <div className="flex items-center space-x-2">
-                                                        <FiTruck className="text-primary-400" />
-                                                        <span className="text-dark-300">Vehicle:</span>
-                                                        <span className="text-white">{job.registration_number} - {job.brand} {job.model} ({job.year})</span>
-                                                    </div>
-
-                                                    <div className="flex items-center space-x-2">
-                                                        <FiCalendar className="text-primary-400" />
-                                                        <span className="text-dark-300">Completed:</span>
-                                                        <span className="text-white">
-                                                            {job.completion_date ? new Date(job.completion_date).toLocaleDateString() : 'Recently'}
+                                    return (
+                                        <div key={job.request_id} className="border border-dark-600 rounded-lg p-6 hover:border-dark-500 transition-colors">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center space-x-3 mb-2">
+                                                        <h3 className="text-lg font-semibold text-white">{service.name || 'Service'}</h3>
+                                                        <span className="inline-block px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-400">
+                                                            COMPLETED
                                                         </span>
                                                     </div>
 
-                                                    <div className="flex items-center space-x-2">
-                                                        <FiDollarSign className="text-primary-400" />
-                                                        <span className="text-dark-300">Final Cost:</span>
-                                                        <span className="text-white">₹{job.final_cost || job.estimated_cost}</span>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                        <div className="flex items-center space-x-2">
+                                                            <FiUser className="text-primary-400" />
+                                                            <span className="text-dark-300">Customer:</span>
+                                                            <span className="text-white">{customer.name || 'N/A'}</span>
+                                                        </div>
+
+                                                        <div className="flex items-center space-x-2">
+                                                            <FiTruck className="text-primary-400" />
+                                                            <span className="text-dark-300">Vehicle:</span>
+                                                            <span className="text-white">
+                                                                {vehicle.registration_number || 'N/A'} - {vehicle.brand} {vehicle.model}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="flex items-center space-x-2">
+                                                            <FiCalendar className="text-primary-400" />
+                                                            <span className="text-dark-300">Completed:</span>
+                                                            <span className="text-white">
+                                                                {job.completion_date ? new Date(job.completion_date).toLocaleDateString() : 'Recently'}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="flex items-center space-x-2">
+                                                            <FiDollarSign className="text-primary-400" />
+                                                            <span className="text-dark-300">Final Cost:</span>
+                                                            <span className="text-white">₹{job.final_cost || job.estimated_cost || 'N/A'}</span>
+                                                        </div>
                                                     </div>
+
+                                                    {job.customer_notes && (
+                                                        <div className="mt-3 p-3 bg-dark-700 rounded">
+                                                            <div className="flex items-start space-x-2">
+                                                                <FiMessageSquare className="text-blue-400 mt-1" />
+                                                                <div>
+                                                                    <span className="text-dark-300 text-sm">Customer Notes:</span>
+                                                                    <p className="text-white text-sm mt-1">{job.customer_notes}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {job.mechanic_notes && (
+                                                        <div className="mt-3 p-3 bg-primary-500/10 rounded">
+                                                            <div className="flex items-start space-x-2">
+                                                                <FiMessageSquare className="text-primary-400 mt-1" />
+                                                                <div>
+                                                                    <span className="text-dark-300 text-sm">Your Notes:</span>
+                                                                    <p className="text-white text-sm mt-1">{job.mechanic_notes}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-
-                                                {job.customer_notes && (
-                                                    <div className="mt-3 p-3 bg-dark-700 rounded">
-                                                        <div className="flex items-start space-x-2">
-                                                            <FiMessageSquare className="text-blue-400 mt-1" />
-                                                            <div>
-                                                                <span className="text-dark-300 text-sm">Customer Notes:</span>
-                                                                <p className="text-white text-sm mt-1">{job.customer_notes}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {job.mechanic_notes && (
-                                                    <div className="mt-3 p-3 bg-primary-500/10 rounded">
-                                                        <div className="flex items-start space-x-2">
-                                                            <FiMessageSquare className="text-primary-400 mt-1" />
-                                                            <div>
-                                                                <span className="text-dark-300 text-sm">Your Notes:</span>
-                                                                <p className="text-white text-sm mt-1">{job.mechanic_notes}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

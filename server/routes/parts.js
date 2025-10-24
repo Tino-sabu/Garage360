@@ -1,15 +1,6 @@
 const express = require('express');
-const { Pool } = require('pg');
 const router = express.Router();
-
-// Database configuration
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'garage360',
-  password: 'Astra1512',
-  port: 5432,
-});
+const { query: dbQuery } = require('../config/database');
 
 // GET /api/parts - Get all parts with optional filtering
 router.get('/', async (req, res) => {
@@ -40,7 +31,7 @@ router.get('/', async (req, res) => {
 
     query += ' ORDER BY category, part_name';
 
-    const result = await pool.query(query, queryParams);
+    const result = await dbQuery(query, queryParams);
 
     res.json({
       success: true,
@@ -60,7 +51,7 @@ router.get('/', async (req, res) => {
 // GET /api/parts/categories - Get all unique categories
 router.get('/categories', async (req, res) => {
   try {
-    const result = await pool.query('SELECT DISTINCT category FROM parts ORDER BY category');
+    const result = await dbQuery('SELECT DISTINCT category FROM parts ORDER BY category');
 
     res.json({
       success: true,
@@ -79,7 +70,7 @@ router.get('/categories', async (req, res) => {
 // GET /api/parts/low-stock - Get parts with low stock
 router.get('/low-stock', async (req, res) => {
   try {
-    const result = await pool.query(`
+    const result = await dbQuery(`
       SELECT * FROM parts 
       WHERE current_stock <= stock_min 
       ORDER BY current_stock ASC, category, part_name
@@ -104,7 +95,7 @@ router.get('/low-stock', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM parts WHERE id = $1', [id]);
+    const result = await dbQuery('SELECT * FROM parts WHERE id = $1', [id]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -175,7 +166,7 @@ router.put('/:id/stock', async (req, res) => {
       });
     }
 
-    const result = await pool.query(query, queryParams);
+    const result = await dbQuery(query, queryParams);
 
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -202,7 +193,7 @@ router.put('/:id/stock', async (req, res) => {
 // GET /api/parts/stats/overview - Get parts statistics
 router.get('/stats/overview', async (req, res) => {
   try {
-    const stats = await pool.query(`
+    const stats = await dbQuery(`
       SELECT 
         COUNT(*) as total_parts,
         COUNT(*) FILTER (WHERE current_stock <= stock_min) as low_stock_count,
@@ -212,7 +203,7 @@ router.get('/stats/overview', async (req, res) => {
       FROM parts
     `);
 
-    const categoryStats = await pool.query(`
+    const categoryStats = await dbQuery(`
       SELECT 
         category,
         COUNT(*) as part_count,

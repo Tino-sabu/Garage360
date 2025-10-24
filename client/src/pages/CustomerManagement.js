@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiArrowLeft, FiSearch, FiUsers } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiArrowLeft, FiSearch, FiUsers, FiChevronRight } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { customersAPI } from '../config/api';
 
 const CustomerManagement = () => {
+    const navigate = useNavigate();
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -14,22 +17,12 @@ const CustomerManagement = () => {
     const fetchCustomers = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5000/api/customers', {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            const result = await customersAPI.getAllCustomers();
 
-            if (response.ok) {
-                const data = await response.json();
-                setCustomers(data.data || []);
-
-                // Calculate stats
-                const total = data.data?.length || 0;
-
-                setCustomerStats({ total });
+            if (result.success) {
+                setCustomers(result.data || []);
+                setCustomerStats({ total: result.data?.length || 0 });
             } else {
-                console.error('Failed to fetch customers:', response.status);
                 setCustomers([]);
             }
         } catch (error) {
@@ -54,7 +47,8 @@ const CustomerManagement = () => {
     });
 
     const goBack = () => {
-        window.history.back();
+        // Navigate to manager dashboard instead of browser history
+        navigate('/manager-dashboard');
     };
 
     if (loading) {
@@ -143,7 +137,11 @@ const CustomerManagement = () => {
                                 </thead>
                                 <tbody>
                                     {filteredCustomers.map((customer) => (
-                                        <tr key={customer.customer_id || customer.id} className="border-b border-dark-600 hover:bg-dark-700/50">
+                                        <tr
+                                            key={customer.customer_id || customer.id}
+                                            onClick={() => navigate(`/customer-details/${customer.customer_id || customer.id}`)}
+                                            className="border-b border-dark-600 hover:bg-dark-700/70 cursor-pointer transition-colors"
+                                        >
                                             <td className="p-4 text-white font-mono">
                                                 #{customer.customer_id || customer.id}
                                             </td>
@@ -180,15 +178,18 @@ const CustomerManagement = () => {
                                             </td>
 
                                             <td className="p-4">
-                                                <div className="flex items-center space-x-2 text-dark-300">
-                                                    <FiCalendar size={14} />
-                                                    <span className="text-sm">
-                                                        {new Date(customer.created_at).toLocaleDateString('en-US', {
-                                                            year: 'numeric',
-                                                            month: 'short',
-                                                            day: 'numeric'
-                                                        })}
-                                                    </span>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2 text-dark-300">
+                                                        <FiCalendar size={14} />
+                                                        <span className="text-sm">
+                                                            {new Date(customer.created_at).toLocaleDateString('en-US', {
+                                                                year: 'numeric',
+                                                                month: 'short',
+                                                                day: 'numeric'
+                                                            })}
+                                                        </span>
+                                                    </div>
+                                                    <FiChevronRight className="text-dark-400" />
                                                 </div>
                                             </td>
                                         </tr>

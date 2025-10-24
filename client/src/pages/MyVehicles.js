@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FiTruck, FiPlus, FiEdit3, FiTrash2, FiCalendar, FiDroplet, FiHash, FiArrowLeft, FiActivity, FiClock } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { vehiclesAPI } from '../config/api';
 
 const MyVehicles = () => {
     const navigate = useNavigate();
@@ -33,11 +34,7 @@ const MyVehicles = () => {
         if (!userData) return;
 
         const user = JSON.parse(userData);
-        console.log('User object in MyVehicles:', user);
-
-        // For customers, the login API returns customer_id as 'id'
-        const customerId = user.role === 'customer' ? user.id : (user.customer_id || user.user_id || user.id);
-        console.log('Customer ID for fetching vehicles:', customerId);
+        const customerId = user.id;
 
         if (!customerId) {
             console.error('No customer ID found');
@@ -46,21 +43,9 @@ const MyVehicles = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/vehicles/customer/${customerId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Vehicles fetched:', data);
-                setVehicles(data.data);
-            } else {
-                console.error('Failed to fetch vehicles, status:', response.status);
-                const errorData = await response.json();
-                console.error('Error data:', errorData);
+            const result = await vehiclesAPI.getCustomerVehicles(customerId);
+            if (result.success) {
+                setVehicles(result.data);
             }
         } catch (error) {
             console.error('Error fetching vehicles:', error);
@@ -75,20 +60,12 @@ const MyVehicles = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/vehicles/${vehicleId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
+            const result = await vehiclesAPI.deleteVehicle(vehicleId);
+            if (result.success) {
                 alert('Vehicle deleted successfully!');
-                fetchVehicles(); // Refresh the list
+                fetchVehicles();
             } else {
-                const data = await response.json();
-                alert(`Error: ${data.message}`);
+                alert(`Error: ${result.message}`);
             }
         } catch (error) {
             console.error('Error deleting vehicle:', error);

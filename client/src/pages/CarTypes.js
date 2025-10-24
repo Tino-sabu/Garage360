@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiArrowLeft, FiGrid, FiTruck } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import API from '../config/api';
 
 const CarTypes = () => {
     const [carTypes, setCarTypes] = useState([]);
@@ -20,31 +21,26 @@ const CarTypes = () => {
     const fetchCarTypes = async () => {
         try {
             setLoading(true);
-            const brandParam = brandFilter !== 'all' ? `brand=${encodeURIComponent(brandFilter)}` : '';
-            const bodyTypeParam = bodyTypeFilter !== 'all' ? `body_type=${encodeURIComponent(bodyTypeFilter)}` : '';
-            const searchParam = searchTerm ? `search=${encodeURIComponent(searchTerm)}` : '';
 
-            const params = [brandParam, bodyTypeParam, searchParam].filter(Boolean).join('&');
-            const url = `http://localhost:5000/api/cartypes${params ? `?${params}` : ''}`;
+            const filters = {
+                brand: brandFilter,
+                body_type: bodyTypeFilter,
+                search: searchTerm
+            };
 
-            const response = await fetch(url, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            const response = await API.carTypes.getAll(filters);
 
-            if (response.ok) {
-                const data = await response.json();
-                setCarTypes(data.data || []);
+            if (response.success) {
+                setCarTypes(response.data || []);
 
                 // Calculate stats
-                const total = data.data?.length || 0;
-                const uniqueBrands = [...new Set(data.data?.map(car => car.brand))].length;
-                const uniqueBodyTypes = [...new Set(data.data?.map(car => car.body_type))].length;
+                const total = response.data?.length || 0;
+                const uniqueBrands = [...new Set(response.data?.map(car => car.brand))].length;
+                const uniqueBodyTypes = [...new Set(response.data?.map(car => car.body_type))].length;
 
                 setCarTypeStats({ total, brands: uniqueBrands, bodyTypes: uniqueBodyTypes });
             } else {
-                console.error('Failed to fetch car types:', response.status);
+                console.error('Failed to fetch car types:', response.message);
                 setCarTypes([]);
             }
         } catch (error) {
@@ -59,18 +55,16 @@ const CarTypes = () => {
     const fetchFilters = async () => {
         try {
             const [brandsResponse, bodyTypesResponse] = await Promise.all([
-                fetch('http://localhost:5000/api/cartypes/brands'),
-                fetch('http://localhost:5000/api/cartypes/body-types')
+                API.carTypes.getBrands(),
+                API.carTypes.getBodyTypes()
             ]);
 
-            if (brandsResponse.ok) {
-                const brandsData = await brandsResponse.json();
-                setBrands(brandsData.data || []);
+            if (brandsResponse.success) {
+                setBrands(brandsResponse.data || []);
             }
 
-            if (bodyTypesResponse.ok) {
-                const bodyTypesData = await bodyTypesResponse.json();
-                setBodyTypes(bodyTypesData.data || []);
+            if (bodyTypesResponse.success) {
+                setBodyTypes(bodyTypesResponse.data || []);
             }
         } catch (error) {
             console.error('Error fetching filters:', error);

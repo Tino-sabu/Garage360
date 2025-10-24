@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiTruck, FiSave, FiArrowLeft, FiUser, FiHash, FiCalendar, FiTool, FiDroplet, FiActivity, FiClock } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
+import { vehiclesAPI } from '../config/api';
+import { supabase } from '../config/supabase';
 
 const AddVehicle = () => {
     const navigate = useNavigate();
@@ -41,18 +43,14 @@ const AddVehicle = () => {
 
     const fetchBrands = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/vehicles/brands', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const { data, error } = await supabase
+                .from('cartypes')
+                .select('brand')
+                .order('brand');
 
-            if (response.ok) {
-                const data = await response.json();
-                setBrands(data.data);
-            } else {
-                console.error('Failed to fetch brands');
+            if (!error && data) {
+                const uniqueBrands = [...new Set(data.map(v => v.brand))];
+                setBrands(uniqueBrands);
             }
         } catch (error) {
             console.error('Error fetching brands:', error);
@@ -66,18 +64,16 @@ const AddVehicle = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/vehicles/brands/${encodeURIComponent(brand)}/models`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const { data, error } = await supabase
+                .from('cartypes')
+                .select('model')
+                .eq('brand', brand)
+                .order('model');
 
-            if (response.ok) {
-                const data = await response.json();
-                setModels(data.data);
+            if (!error && data) {
+                const uniqueModels = [...new Set(data.map(v => v.model))];
+                setModels(uniqueModels);
             } else {
-                console.error('Failed to fetch models');
                 setModels([]);
             }
         } catch (error) {
@@ -166,30 +162,29 @@ const AddVehicle = () => {
         setLoading(true);
 
         try {
+            // Send all vehicle data including optional fields
             const vehicleData = {
-                ...formData,
-                customer_id: customerId
+                customer_id: customerId,
+                registration_number: formData.registration_number,
+                brand: formData.brand,
+                model: formData.model,
+                year: formData.year,
+                color: formData.color || null,
+                fuel_type: formData.fuel_type,
+                mileage: formData.km_driven ? parseInt(formData.km_driven) : null,
+                vin: formData.vin || null,
+                engine_number: formData.engine_number || null,
+                chassis_number: formData.chassis_number || null,
+                last_oil_change: formData.last_oil_change || null
             };
 
-            console.log('Vehicle data being sent:', vehicleData);
+            const result = await vehiclesAPI.addVehicle(vehicleData);
 
-            const response = await fetch('http://localhost:5000/api/vehicles', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(vehicleData)
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
+            if (result.success) {
                 alert('Vehicle added successfully!');
-                navigate('/customer-dashboard'); // Navigate back to customer dashboard
+                navigate('/customer-dashboard');
             } else {
-                console.error('Server error:', data);
-                alert(`Error: ${data.message}`);
+                alert(`Error: ${result.message}`);
             }
         } catch (error) {
             console.error('Error adding vehicle:', error);
