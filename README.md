@@ -1,6 +1,6 @@
 # Garage360 - Vehicle Service Management System
 Live at:https://garage360.vercel.app/
-
+<img width="1918" height="968" alt="image" src="https://github.com/user-attachments/assets/de83ed45-1702-4bfd-8d35-2e70b50c0ab4" />
 A comprehensive, modern vehicle service management web application built with React.js and Node.js, featuring role-based access control and a professional dark theme interface.
 
 ## ✨ Recent Updates (October 2025)
